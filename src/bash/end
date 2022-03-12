@@ -40,4 +40,4 @@ echo Init power off: $raw_device_path
 # https://unix.stackexchange.com/questions/35508/eject-usb-drives-eject-command#83587
 udisksctl power-off -b $raw_device_path
 echo Print devices, empty string if the device was powered off correctly
-udisksctl status | grep sdc
+udisksctl status | grep $raw_device
