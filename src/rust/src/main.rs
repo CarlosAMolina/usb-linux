@@ -1,81 +1,123 @@
+use std::env;
 use std::process::Command;
 
-fn main() {
-    let partition_device = "sdc1";
-    let raw_device = &partition_device[..partition_device.len()-1];
-    let suffix_device_path = "/dev";
-    let raw_device_path = format!("{suffix_device_path}/{raw_device}");
-    let partition_device_path =  format!("{suffix_device_path}/{partition_device}");
-    let file_system_path = "/media/usb";
-    let start_usb = !true;
+struct Devices {
+    partition: String,
+    raw: String,
+}
 
+struct Paths {
+    suffix_device: String,
+    raw_device: String,
+    partition_device: String,
+    file_system: String,
+}
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+    let suffix_device_path = "/dev";
+
+    match args.len() {
+        3 => {
+            let partition_device = &args[1];
+            let start_or_end = &args[2];
+
+            let devices = Devices {
+                partition: String::from("sdc1"),
+                raw: String::from(&partition_device[..partition_device.len() - 1]),
+            };
+
+            let paths = Paths {
+                suffix_device: String::from(suffix_device_path),
+                raw_device: format!("{suffix_device_path}/{}", devices.raw),
+                partition_device: format!("{suffix_device_path}/{partition_device}"),
+                file_system: String::from("/media/usb"),
+            };
+
+            print_summary(&devices, &paths);
+            match &start_or_end[..] {
+                "start" => {
+                    println!("## Init start USB");
+                    println!();
+                    // https://linuxconfig.org/howto-mount-usb-drive-in-linux
+                    println!(
+                        "Init mount device {} on {}",
+                        paths.partition_device, paths.file_system
+                    );
+                    run_command(&format!(
+                        "sudo mount {} {}",
+                        paths.partition_device, paths.file_system
+                    ));
+                    print_system_current_status(&devices.raw, &paths.suffix_device);
+                }
+                "end" => {
+                    println!("## Init end USB");
+                    println!();
+                    println!("Init umount {}", paths.file_system);
+                    run_command(&format!("sudo umount {}", paths.file_system));
+                    print_system_current_status(&devices.raw, &paths.suffix_device);
+                    println!();
+                    println!("Init eject {}", paths.raw_device);
+                    run_command(&format!("sudo eject {}", paths.raw_device));
+                    println!();
+                    print_system_current_status(&devices.raw, &paths.suffix_device);
+                    // https://unix.stackexchange.com/questions/35508/eject-usb-drives-eject-command#83587
+                    println!("Init power off {}", paths.raw_device);
+                    run_command(&format!("udisksctl power-off -b {}", paths.raw_device));
+                    print_system_current_status(&devices.raw, &paths.suffix_device);
+                }
+                _ => {
+                    eprintln!("error: invalid command");
+                    help();
+                }
+            }
+        }
+        _ => {
+            help();
+        }
+    }
+}
+
+fn help() {
+    println!(
+        "Usage:
+    cargo run <string> {{start|end}}
+        Start or end an USB device.
+Example:
+    cargo run sdc1 start"
+    );
+}
+
+fn print_summary(devices: &Devices, paths: &Paths) {
     // https://serverfault.com/questions/338937/differences-between-dev-sda-and-dev-sda1
     println!("## Summary");
     println!();
-    println!("- Raw device: {}", raw_device);
-    println!("- Raw device path: {}", raw_device_path);
-    println!("- Partition device: {}", partition_device);
-    println!("- Partition device path: {}", partition_device_path);
-    println!("- File system path: {}", file_system_path);
+    println!("- Raw device: {}", devices.raw);
+    println!("- Raw device path: {}", paths.raw_device);
+    println!("- Partition device: {}", devices.partition);
+    println!("- Partition device path: {}", paths.partition_device);
+    println!("- File system path: {}", paths.file_system);
     println!();
+    print_system_current_status(&devices.raw, &paths.suffix_device);
+}
 
-
+fn print_system_current_status(raw_device: &str, suffix_device_path: &str) {
     println!("## System current status");
     println!();
-    print_devices_status(&raw_device, &suffix_device_path);
-    println!();
-    print_mount_status(&raw_device);
-
-    if start_usb {
-        println!("## Init start USB");
-        println!();
-        run_mount(&partition_device_path, &file_system_path);
-        print_mount_status(&raw_device);
-    } else {
-        println!("## Init end USB");
-        println!();
-        println!("Init umount {}", file_system_path);
-        run_command(&format!("sudo umount {file_system_path}"));
-        print_mount_status(&raw_device);
-        println!();
-        println!("Init eject {}", raw_device_path);
-        run_command(&format!("sudo eject {raw_device_path}"));
-        println!();
-        print_devices_status(&raw_device, &suffix_device_path);
-        // https://unix.stackexchange.com/questions/35508/eject-usb-drives-eject-command#83587
-        println!("### Init power off {}", raw_device_path);
-        run_command(&format!("udisksctl power-off -b {raw_device_path}"));
-        print_devices_status(&raw_device, &suffix_device_path);
-    }
-
-}
-
-fn print_devices_status(raw_device: &str, suffix_device_path: &str) {
     println!("### Devices");
     run_command(&format!("ls {suffix_device_path} | grep {raw_device}"));
-}
-
-fn print_mount_status(raw_device: &str) {
     println!("### Mount status");
     run_command(&format!("mount | grep {raw_device}"));
 }
 
-// https://linuxconfig.org/howto-mount-usb-drive-in-linux
-fn run_mount(partition_device_path: &str, file_system_path: &str){
-    println!("Init mount device {} on {}", partition_device_path, file_system_path);
-    run_command(&format!("sudo mount {partition_device_path} {file_system_path}"));
-}
-
 fn run_command(c: &str) {
     let output = Command::new("bash")
-            .arg("-c")
-            .arg(c)
-            .output()
-            .expect("failed to execute process");
+        .arg("-c")
+        .arg(c)
+        .output()
+        .expect("failed to execute process");
     if output.stderr.len() > 0 {
         panic!("{}", String::from_utf8_lossy(&output.stderr));
     }
     println!("{}", String::from_utf8_lossy(&output.stdout));
 }
-
-
