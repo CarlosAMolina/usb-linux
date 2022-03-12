@@ -1,0 +1,36 @@
+#!/usr/bin/bash
+#
+# https://linuxconfig.org/howto-mount-usb-drive-in-linux
+# Example:
+# sudo ./end sdc1 /mnt
+
+partition_device=$1
+partition_device_path=/dev/$partition_device
+raw_device=${partition_device::-1}
+raw_device_path=/dev/$raw_device
+file_system_path=$2
+
+echo - Raw device: $raw_device
+echo - Raw device path: $raw_device_path
+echo - Partition device: $partition_device
+echo - Partition device path: $partition_device_path
+echo - File system path: $file_system_path
+echo
+
+echo Print current status
+echo - Devices
+ls $raw_device_path*
+echo
+echo - Mount
+mount | grep $raw_device
+echo
+
+
+echo Mount
+echo Init mount device $partition_device on $file_system_path
+mount $partition_device_path $file_system_path
+echo Print mount status
+mount | grep $raw_device
+echo
+
+
