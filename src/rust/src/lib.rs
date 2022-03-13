@@ -91,7 +91,7 @@ impl Paths {
 }
 
 fn help() {
-    println!(
+    eprintln!(
         "Usage:
     cargo run <string> {{on|off}}
         Start or end an USB device.
