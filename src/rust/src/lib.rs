@@ -6,7 +6,8 @@ pub fn run(config: Config) -> Result<(), &'static str> {
     print_summary(&devices, &paths);
     match &config.start_or_end[..] {
         "on" => {
-            println!("## Init start USB");
+            println!("Init start USB");
+            println!("==============");
             println!();
             // https://linuxconfig.org/howto-mount-usb-drive-in-linux
             run_command(&format!(
@@ -16,7 +17,8 @@ pub fn run(config: Config) -> Result<(), &'static str> {
             print_system_current_status(&devices.raw, &paths.suffix_device);
         }
         "off" => {
-            println!("## Init end USB");
+            println!("Init end USB");
+            println!("============");
             println!();
             run_command(&format!("sudo umount {}", paths.file_system));
             print_system_current_status(&devices.raw, &paths.suffix_device);
@@ -102,7 +104,8 @@ Example:
 
 fn print_summary(devices: &Devices, paths: &Paths) {
     // https://serverfault.com/questions/338937/differences-between-dev-sda-and-dev-sda1
-    println!("## Summary");
+    println!("Summary");
+    println!("=======");
     println!();
     println!("- Raw device: {}", devices.raw);
     println!("- Raw device path: {}", paths.raw_device);
@@ -114,11 +117,14 @@ fn print_summary(devices: &Devices, paths: &Paths) {
 }
 
 fn print_system_current_status(raw_device: &str, suffix_device_path: &str) {
-    println!("## System current status");
+    println!("System current status");
+    println!("---------------------");
     println!();
-    println!("### Devices");
+    println!("Devices status");
+    println!("~~~~~~~~~~~~~~");
     run_command(&format!("ls {suffix_device_path} | grep {raw_device}"));
-    println!("### Mount status");
+    println!("Mount status");
+    println!("~~~~~~~~~~~~~~");
     run_command(&format!("mount | grep {raw_device}"));
 }
 
