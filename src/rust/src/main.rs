@@ -36,7 +36,7 @@ fn main() {
 
             print_summary(&devices, &paths);
             match &start_or_end[..] {
-                "start" => {
+                "on" => {
                     println!("## Init start USB");
                     println!();
                     // https://linuxconfig.org/howto-mount-usb-drive-in-linux
@@ -50,7 +50,7 @@ fn main() {
                     ));
                     print_system_current_status(&devices.raw, &paths.suffix_device);
                 }
-                "end" => {
+                "off" => {
                     println!("## Init end USB");
                     println!();
                     println!("Init umount {}", paths.file_system);
@@ -81,7 +81,7 @@ fn main() {
 fn help() {
     println!(
         "Usage:
-    cargo run <string> {{start|end}}
+    cargo run <string> {{on|off}}
         Start or end an USB device.
 Example:
     cargo run sdc1 start"
