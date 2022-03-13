@@ -1,19 +1,8 @@
 use std::process::Command;
 
 pub fn run(config: Config) -> Result<(), &'static str> {
-    let suffix_device_path = "/dev";
-    let devices = Devices {
-        partition: String::from(&config.partition_device),
-        raw: String::from(&config.partition_device[..config.partition_device.len() - 1]),
-    };
-
-    let paths = Paths {
-        suffix_device: String::from(suffix_device_path),
-        raw_device: format!("{suffix_device_path}/{}", devices.raw),
-        partition_device: format!("{suffix_device_path}/{}", config.partition_device),
-        file_system: String::from("/media/usb"),
-    };
-
+    let devices = Devices::new(&config);
+    let paths = Paths::new(&config, &devices);
     print_summary(&devices, &paths);
     match &config.start_or_end[..] {
         "on" => {
@@ -80,11 +69,32 @@ struct Devices {
     raw: String,
 }
 
+impl Devices {
+    pub fn new(config: &Config) -> Devices {
+        Devices {
+            partition: String::from(&config.partition_device),
+            raw: String::from(&config.partition_device[..config.partition_device.len() - 1]),
+        }
+    }
+}
+
 struct Paths {
     suffix_device: String,
     raw_device: String,
     partition_device: String,
     file_system: String,
+}
+
+impl Paths {
+    pub fn new(config: &Config, devices: &Devices) -> Paths {
+        let suffix_device_path = "/dev";
+        Paths {
+            suffix_device: String::from(suffix_device_path),
+            raw_device: format!("{suffix_device_path}/{}", devices.raw),
+            partition_device: format!("{suffix_device_path}/{}", config.partition_device),
+            file_system: String::from("/media/usb"),
+        }
+    }
 }
 
 fn help() {
