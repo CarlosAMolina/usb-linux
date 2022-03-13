@@ -9,10 +9,6 @@ pub fn run(config: Config) -> Result<(), &'static str> {
             println!("## Init start USB");
             println!();
             // https://linuxconfig.org/howto-mount-usb-drive-in-linux
-            println!(
-                "Init mount device {} on {}",
-                paths.partition_device, paths.file_system
-            );
             run_command(&format!(
                 "sudo mount {} {}",
                 paths.partition_device, paths.file_system
@@ -22,16 +18,13 @@ pub fn run(config: Config) -> Result<(), &'static str> {
         "off" => {
             println!("## Init end USB");
             println!();
-            println!("Init umount {}", paths.file_system);
             run_command(&format!("sudo umount {}", paths.file_system));
             print_system_current_status(&devices.raw, &paths.suffix_device);
             println!();
-            println!("Init eject {}", paths.raw_device);
             run_command(&format!("sudo eject {}", paths.raw_device));
             println!();
             print_system_current_status(&devices.raw, &paths.suffix_device);
             // https://unix.stackexchange.com/questions/35508/eject-usb-drives-eject-command#83587
-            println!("Init power off {}", paths.raw_device);
             run_command(&format!("udisksctl power-off -b {}", paths.raw_device));
             print_system_current_status(&devices.raw, &paths.suffix_device);
         }
@@ -130,6 +123,7 @@ fn print_system_current_status(raw_device: &str, suffix_device_path: &str) {
 }
 
 fn run_command(c: &str) {
+    println!("Init: {}", c);
     let output = Command::new("bash")
         .arg("-c")
         .arg(c)
