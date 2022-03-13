@@ -4,13 +4,21 @@ use std::process::Command;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let suffix_device_path = "/dev";
 
     let config = Config::new(&args).unwrap_or_else(|err| {
         println!("Problem parsing arguments: {}", err);
         process::exit(1);
     });
 
+    let _ = run(config).unwrap_or_else(|err| {
+        println!("Application error: {}", err);
+        process::exit(1);
+    });
+
+}
+
+fn run(config: Config) -> Result<(), &'static str> {
+    let suffix_device_path = "/dev";
     let devices = Devices {
         partition: String::from(&config.partition_device),
         raw: String::from(&config.partition_device[..config.partition_device.len() - 1]),
@@ -56,10 +64,11 @@ fn main() {
             print_system_current_status(&devices.raw, &paths.suffix_device);
         }
         _ => {
-            eprintln!("error: invalid command");
             help();
+            return Err("invalid command");
         }
     }
+    Ok(())
 }
 
 struct Config {
