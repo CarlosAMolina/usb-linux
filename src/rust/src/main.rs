@@ -23,7 +23,7 @@ fn main() {
             let start_or_end = &args[2];
 
             let devices = Devices {
-                partition: String::from("sdc1"),
+                partition: String::from(partition_device),
                 raw: String::from(&partition_device[..partition_device.len() - 1]),
             };
 
@@ -84,7 +84,7 @@ fn help() {
     cargo run <string> {{on|off}}
         Start or end an USB device.
 Example:
-    cargo run sdc1 start"
+    cargo run sdc1 on"
     );
 }
 
