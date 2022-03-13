@@ -4,15 +4,20 @@ use std::process;
 use rust::Config;
 
 fn main() {
+    if let Err(e) = rust::clear_terminal() {
+        eprintln!("Problem clear terminal: {}", e);
+        process::exit(1);
+    }
+
     let args: Vec<String> = env::args().collect();
 
-    let config = Config::new(&args).unwrap_or_else(|err| {
-        eprintln!("Problem parsing arguments: {}", err);
+    let config = Config::new(&args).unwrap_or_else(|e| {
+        eprintln!("Problem parsing arguments: {}", e);
         process::exit(1);
     });
 
-    let _ = rust::run(config).unwrap_or_else(|err| {
-        eprintln!("Application error: {}", err);
+    if let Err(e) = rust::run(config) {
+        eprintln!("Application error: {}", e);
         process::exit(1);
-    });
+    };
 }

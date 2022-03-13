@@ -67,6 +67,16 @@ pub fn run(config: Config) -> Result<(), String> {
     Ok(())
 }
 
+pub fn clear_terminal () -> Result <(), String> {
+    if let Err(e) = run_command(
+        "clear"
+    ) {
+        return Err(e);
+    }
+    Ok(())
+}
+
+
 pub struct Config {
     partition_device: String,
     start_or_end: String,
