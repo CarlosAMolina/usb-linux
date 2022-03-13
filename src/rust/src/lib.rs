@@ -1,38 +1,67 @@
 use std::process::Command;
 
-pub fn run(config: Config) -> Result<(), &'static str> {
+pub fn run(config: Config) -> Result<(), String> {
     let devices = Devices::new(&config);
     let paths = Paths::new(&config, &devices);
-    print_summary(&devices, &paths);
+    // https://serverfault.com/questions/338937/differences-between-dev-sda-and-dev-sda1
+    println!("Summary");
+    println!("=======");
+    println!();
+    println!("- Raw device: {}", devices.raw);
+    println!("- Raw device path: {}", paths.raw_device);
+    println!("- Partition device: {}", devices.partition);
+    println!("- Partition device path: {}", paths.partition_device);
+    println!("- File system path: {}", paths.file_system);
+    println!();
+    if let Err(e) = print_system_current_status(&devices.raw, &paths.suffix_device) {
+        return Err(e);
+    }
     match &config.start_or_end[..] {
         "on" => {
             println!("Init start USB");
             println!("==============");
             println!();
             // https://linuxconfig.org/howto-mount-usb-drive-in-linux
-            run_command(&format!(
+            if let Err(e) = run_command(&format!(
                 "sudo mount {} {}",
                 paths.partition_device, paths.file_system
-            ));
-            print_system_current_status(&devices.raw, &paths.suffix_device);
+            )) {
+                return Err(e);
+            }
+            if let Err(e) = print_system_current_status(&devices.raw, &paths.suffix_device) {
+                return Err(e);
+            }
         }
         "off" => {
             println!("Init end USB");
             println!("============");
             println!();
-            run_command(&format!("sudo umount {}", paths.file_system));
-            print_system_current_status(&devices.raw, &paths.suffix_device);
+            if let Err(e) = run_command(&format!("sudo umount {}", paths.file_system)) {
+                return Err(e);
+            };
+            if let Err(e) = print_system_current_status(&devices.raw, &paths.suffix_device) {
+                return Err(e);
+            }
             println!();
-            run_command(&format!("sudo eject {}", paths.raw_device));
+
+            if let Err(e) = run_command(&format!("sudo eject {}", paths.raw_device)) {
+                return Err(e);
+            };
             println!();
-            print_system_current_status(&devices.raw, &paths.suffix_device);
+            if let Err(e) = print_system_current_status(&devices.raw, &paths.suffix_device) {
+                return Err(e);
+            }
             // https://unix.stackexchange.com/questions/35508/eject-usb-drives-eject-command#83587
-            run_command(&format!("udisksctl power-off -b {}", paths.raw_device));
-            print_system_current_status(&devices.raw, &paths.suffix_device);
+            if let Err(e) = run_command(&format!("udisksctl power-off -b {}", paths.raw_device)) {
+                return Err(e);
+            };
+            if let Err(e) = print_system_current_status(&devices.raw, &paths.suffix_device) {
+                return Err(e);
+            }
         }
         _ => {
             help();
-            return Err("invalid command");
+            return Err("invalid command".to_string());
         }
     }
     Ok(())
@@ -102,33 +131,24 @@ Example:
     );
 }
 
-fn print_summary(devices: &Devices, paths: &Paths) {
-    // https://serverfault.com/questions/338937/differences-between-dev-sda-and-dev-sda1
-    println!("Summary");
-    println!("=======");
-    println!();
-    println!("- Raw device: {}", devices.raw);
-    println!("- Raw device path: {}", paths.raw_device);
-    println!("- Partition device: {}", devices.partition);
-    println!("- Partition device path: {}", paths.partition_device);
-    println!("- File system path: {}", paths.file_system);
-    println!();
-    print_system_current_status(&devices.raw, &paths.suffix_device);
-}
-
-fn print_system_current_status(raw_device: &str, suffix_device_path: &str) {
+fn print_system_current_status(raw_device: &str, suffix_device_path: &str) -> Result<(), String> {
     println!("System current status");
     println!("---------------------");
     println!();
     println!("Devices status");
     println!("~~~~~~~~~~~~~~");
-    run_command(&format!("ls {suffix_device_path} | grep {raw_device}"));
+    if let Err(e) = run_command(&format!("ls {suffix_device_path} | grep {raw_device}")) {
+        return Err(e);
+    }
     println!("Mount status");
     println!("~~~~~~~~~~~~~~");
-    run_command(&format!("mount | grep {raw_device}"));
+    if let Err(e) = run_command(&format!("mount | grep {raw_device}")) {
+        return Err(e);
+    }
+    Ok(())
 }
 
-fn run_command(c: &str) {
+fn run_command(c: &str) -> Result<(), String> {
     println!("Init: {}", c);
     let output = Command::new("bash")
         .arg("-c")
@@ -136,7 +156,8 @@ fn run_command(c: &str) {
         .output()
         .expect("failed to execute process");
     if output.stderr.len() > 0 {
-        panic!("{}", String::from_utf8_lossy(&output.stderr));
+        return Err(String::from_utf8_lossy(&output.stderr).to_string());
     }
     println!("{}", String::from_utf8_lossy(&output.stdout));
+    Ok(())
 }
