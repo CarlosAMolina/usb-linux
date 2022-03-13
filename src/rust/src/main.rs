@@ -1,80 +1,86 @@
 use std::env;
+use std::process;
 use std::process::Command;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
     let suffix_device_path = "/dev";
 
-    match args.len() {
-        3 => {
-            let config = parse_config(&args);
+    let config = Config::new(&args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {}", err);
+        process::exit(1);
+    });
 
-            let devices = Devices {
-                partition: String::from(&config.partition_device),
-                raw: String::from(&config.partition_device[..config.partition_device.len() - 1]),
-            };
+    let devices = Devices {
+        partition: String::from(&config.partition_device),
+        raw: String::from(&config.partition_device[..config.partition_device.len() - 1]),
+    };
 
-            let paths = Paths {
-                suffix_device: String::from(suffix_device_path),
-                raw_device: format!("{suffix_device_path}/{}", devices.raw),
-                partition_device: format!("{suffix_device_path}/{}", config.partition_device),
-                file_system: String::from("/media/usb"),
-            };
+    let paths = Paths {
+        suffix_device: String::from(suffix_device_path),
+        raw_device: format!("{suffix_device_path}/{}", devices.raw),
+        partition_device: format!("{suffix_device_path}/{}", config.partition_device),
+        file_system: String::from("/media/usb"),
+    };
 
-            print_summary(&devices, &paths);
-            match &config.start_or_end[..] {
-                "on" => {
-                    println!("## Init start USB");
-                    println!();
-                    // https://linuxconfig.org/howto-mount-usb-drive-in-linux
-                    println!(
-                        "Init mount device {} on {}",
-                        paths.partition_device, paths.file_system
-                    );
-                    run_command(&format!(
-                        "sudo mount {} {}",
-                        paths.partition_device, paths.file_system
-                    ));
-                    print_system_current_status(&devices.raw, &paths.suffix_device);
-                }
-                "off" => {
-                    println!("## Init end USB");
-                    println!();
-                    println!("Init umount {}", paths.file_system);
-                    run_command(&format!("sudo umount {}", paths.file_system));
-                    print_system_current_status(&devices.raw, &paths.suffix_device);
-                    println!();
-                    println!("Init eject {}", paths.raw_device);
-                    run_command(&format!("sudo eject {}", paths.raw_device));
-                    println!();
-                    print_system_current_status(&devices.raw, &paths.suffix_device);
-                    // https://unix.stackexchange.com/questions/35508/eject-usb-drives-eject-command#83587
-                    println!("Init power off {}", paths.raw_device);
-                    run_command(&format!("udisksctl power-off -b {}", paths.raw_device));
-                    print_system_current_status(&devices.raw, &paths.suffix_device);
-                }
-                _ => {
-                    eprintln!("error: invalid command");
-                    help();
-                }
-            }
+    print_summary(&devices, &paths);
+    match &config.start_or_end[..] {
+        "on" => {
+            println!("## Init start USB");
+            println!();
+            // https://linuxconfig.org/howto-mount-usb-drive-in-linux
+            println!(
+                "Init mount device {} on {}",
+                paths.partition_device, paths.file_system
+            );
+            run_command(&format!(
+                "sudo mount {} {}",
+                paths.partition_device, paths.file_system
+            ));
+            print_system_current_status(&devices.raw, &paths.suffix_device);
+        }
+        "off" => {
+            println!("## Init end USB");
+            println!();
+            println!("Init umount {}", paths.file_system);
+            run_command(&format!("sudo umount {}", paths.file_system));
+            print_system_current_status(&devices.raw, &paths.suffix_device);
+            println!();
+            println!("Init eject {}", paths.raw_device);
+            run_command(&format!("sudo eject {}", paths.raw_device));
+            println!();
+            print_system_current_status(&devices.raw, &paths.suffix_device);
+            // https://unix.stackexchange.com/questions/35508/eject-usb-drives-eject-command#83587
+            println!("Init power off {}", paths.raw_device);
+            run_command(&format!("udisksctl power-off -b {}", paths.raw_device));
+            print_system_current_status(&devices.raw, &paths.suffix_device);
         }
         _ => {
+            eprintln!("error: invalid command");
             help();
         }
     }
 }
 
-fn parse_config(args: &[String]) -> Config {
-    let partition_device = args[1].clone();
-    let start_or_end = args[2].clone();
-
-    Config { partition_device, start_or_end}
-}
-
 struct Config {
     partition_device: String,
     start_or_end: String,
+}
+
+impl Config {
+    fn new(args: &[String]) -> Result<Config, &'static str> {
+        if args.len() != 3 {
+            help();
+            return Err("not enough arguments");
+        }
+        let partition_device = args[1].clone();
+        let start_or_end = args[2].clone();
+
+        Ok(Config {
+            partition_device,
+            start_or_end,
+        })
+    }
 }
 
 struct Devices {
