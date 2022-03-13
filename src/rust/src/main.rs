@@ -1,41 +1,28 @@
 use std::env;
 use std::process::Command;
 
-struct Devices {
-    partition: String,
-    raw: String,
-}
-
-struct Paths {
-    suffix_device: String,
-    raw_device: String,
-    partition_device: String,
-    file_system: String,
-}
-
 fn main() {
     let args: Vec<String> = env::args().collect();
     let suffix_device_path = "/dev";
 
     match args.len() {
         3 => {
-            let partition_device = &args[1];
-            let start_or_end = &args[2];
+            let config = parse_config(&args);
 
             let devices = Devices {
-                partition: String::from(partition_device),
-                raw: String::from(&partition_device[..partition_device.len() - 1]),
+                partition: String::from(&config.partition_device),
+                raw: String::from(&config.partition_device[..config.partition_device.len() - 1]),
             };
 
             let paths = Paths {
                 suffix_device: String::from(suffix_device_path),
                 raw_device: format!("{suffix_device_path}/{}", devices.raw),
-                partition_device: format!("{suffix_device_path}/{partition_device}"),
+                partition_device: format!("{suffix_device_path}/{}", config.partition_device),
                 file_system: String::from("/media/usb"),
             };
 
             print_summary(&devices, &paths);
-            match &start_or_end[..] {
+            match &config.start_or_end[..] {
                 "on" => {
                     println!("## Init start USB");
                     println!();
@@ -76,6 +63,30 @@ fn main() {
             help();
         }
     }
+}
+
+fn parse_config(args: &[String]) -> Config {
+    let partition_device = args[1].clone();
+    let start_or_end = args[2].clone();
+
+    Config { partition_device, start_or_end}
+}
+
+struct Config {
+    partition_device: String,
+    start_or_end: String,
+}
+
+struct Devices {
+    partition: String,
+    raw: String,
+}
+
+struct Paths {
+    suffix_device: String,
+    raw_device: String,
+    partition_device: String,
+    file_system: String,
 }
 
 fn help() {
