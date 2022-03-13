@@ -2,20 +2,15 @@
 #
 # Notify when a new device is detected
 
-#inotifywait -m -e create /dev/ | while read line
-#inotifywait -m -o /tmp/inotify.log -e create /tmp/borrar/ | while read line
-#inotifywait -m -e create /tmp/borrar/ | while read line
-#do
-#    device=$(echo $line | awk '{print $NF}')
-#    notify-send 'New device' "$device" -i '/usr/share/icons/Adwaita/48x48/devices/drive-removable-media.png'
-#done
-#
-inotifywait -m /tmp/borrar/ -e create -e moved_to |
-    while read dir action file; do
-        /usr/bin/notify-send 'New device' "hi" -i '/usr/share/icons/Adwaita/48x48/devices/drive-removable-media.png'
-        echo "x" >> /tmp/inotify.log
-        echo "The file '$file' appeared in directory '$dir' via '$action'" >> /tmp/inotify.log
-        device=$(echo $line | awk '{print $NF}')
-        echo "$device" >> /tmp/inotify.log
-        notify-send 'New device' "$device" -i '/usr/share/icons/Adwaita/48x48/devices/drive-removable-media.png'
-    done
+# Config
+# Set the same values as you have in a terminal session
+export DISPLAY=":0"
+export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/1000/bus"
+export XDG_RUNTIME_DIR="/run/user/1000"
+
+inotifywait -m -e create /dev/ | while read line
+do
+    device=$(echo $line | awk '{print $NF}')
+    dunstify 'New device' "$device" -u normal -i '/usr/share/icons/Adwaita/48x48/devices/drive-removable-media.png'
+done
+
