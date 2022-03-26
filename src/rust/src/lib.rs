@@ -67,15 +67,12 @@ pub fn run(config: Config) -> Result<(), String> {
     Ok(())
 }
 
-pub fn clear_terminal () -> Result <(), String> {
-    if let Err(e) = run_command(
-        "clear"
-    ) {
+pub fn clear_terminal() -> Result<(), String> {
+    if let Err(e) = run_command("clear") {
         return Err(e);
     }
     Ok(())
 }
-
 
 pub struct Config {
     partition_device: String,
@@ -170,4 +167,29 @@ fn run_command(c: &str) -> Result<(), String> {
     }
     println!("{}", String::from_utf8_lossy(&output.stdout));
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn command_runs_corrrectly() {
+        let _result = match run_command(&format!("echo hi")) {
+            Ok(()) => {}
+            Err(error) => {
+                panic!("Error: {:?}", error);
+            }
+        };
+    }
+
+    #[test]
+    fn command_raises_error() {
+        let _result = match run_command(&format!("asdf")) {
+            Ok(()) => {
+                panic!("Error not raised");
+            }
+            Err(_error) => {}
+        };
+    }
 }
