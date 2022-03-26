@@ -1,20 +1,24 @@
-mod command {
-    use std::process::Command;
+mod command_line {
+    pub mod command {
+        use std::process::Command;
 
-    pub fn run(c: &str) -> Result<(), String> {
-        println!("Init: {}", c);
-        let output = Command::new("bash")
-            .arg("-c")
-            .arg(c)
-            .output()
-            .expect("failed to execute process");
-        if output.stderr.len() > 0 {
-            return Err(String::from_utf8_lossy(&output.stderr).to_string());
+        pub fn run(c: &str) -> Result<(), String> {
+            println!("Init: {}", c);
+            let output = Command::new("bash")
+                .arg("-c")
+                .arg(c)
+                .output()
+                .expect("failed to execute process");
+            if output.stderr.len() > 0 {
+                return Err(String::from_utf8_lossy(&output.stderr).to_string());
+            }
+            println!("{}", String::from_utf8_lossy(&output.stdout));
+            Ok(())
         }
-        println!("{}", String::from_utf8_lossy(&output.stdout));
-        Ok(())
     }
 }
+
+use crate::command_line::command;
 
 pub fn run(config: Config) -> Result<(), String> {
     let devices = Devices::new(&config);
