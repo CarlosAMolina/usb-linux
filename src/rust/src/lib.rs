@@ -150,7 +150,6 @@ fn print_system_current_status(raw_device: &str, suffix_device_path: &str) -> Re
     Ok(())
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -184,5 +183,4 @@ mod tests {
             }
         };
     }
-
 }

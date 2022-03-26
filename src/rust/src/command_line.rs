@@ -6,4 +6,3 @@ pub fn clear() -> Result<(), String> {
     }
     Ok(())
 }
-
