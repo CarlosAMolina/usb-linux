@@ -1,4 +1,20 @@
-use std::process::Command;
+mod command {
+    use std::process::Command;
+
+    pub fn run(c: &str) -> Result<(), String> {
+        println!("Init: {}", c);
+        let output = Command::new("bash")
+            .arg("-c")
+            .arg(c)
+            .output()
+            .expect("failed to execute process");
+        if output.stderr.len() > 0 {
+            return Err(String::from_utf8_lossy(&output.stderr).to_string());
+        }
+        println!("{}", String::from_utf8_lossy(&output.stdout));
+        Ok(())
+    }
+}
 
 pub fn run(config: Config) -> Result<(), String> {
     let devices = Devices::new(&config);
@@ -22,7 +38,7 @@ pub fn run(config: Config) -> Result<(), String> {
             println!("==============");
             println!();
             // https://linuxconfig.org/howto-mount-usb-drive-in-linux
-            if let Err(e) = run_command(&format!(
+            if let Err(e) = command::run(&format!(
                 "sudo mount {} {}",
                 paths.partition_device, paths.file_system
             )) {
@@ -36,7 +52,7 @@ pub fn run(config: Config) -> Result<(), String> {
             println!("Init end USB");
             println!("============");
             println!();
-            if let Err(e) = run_command(&format!("sudo umount {}", paths.file_system)) {
+            if let Err(e) = command::run(&format!("sudo umount {}", paths.file_system)) {
                 return Err(e);
             };
             if let Err(e) = print_system_current_status(&devices.raw, &paths.suffix_device) {
@@ -44,7 +60,7 @@ pub fn run(config: Config) -> Result<(), String> {
             }
             println!();
 
-            if let Err(e) = run_command(&format!("sudo eject {}", paths.raw_device)) {
+            if let Err(e) = command::run(&format!("sudo eject {}", paths.raw_device)) {
                 return Err(e);
             };
             println!();
@@ -52,7 +68,7 @@ pub fn run(config: Config) -> Result<(), String> {
                 return Err(e);
             }
             // https://unix.stackexchange.com/questions/35508/eject-usb-drives-eject-command#83587
-            if let Err(e) = run_command(&format!("udisksctl power-off -b {}", paths.raw_device)) {
+            if let Err(e) = command::run(&format!("udisksctl power-off -b {}", paths.raw_device)) {
                 return Err(e);
             };
             if let Err(e) = print_system_current_status(&devices.raw, &paths.suffix_device) {
@@ -68,7 +84,7 @@ pub fn run(config: Config) -> Result<(), String> {
 }
 
 pub fn clear_terminal() -> Result<(), String> {
-    if let Err(e) = run_command("clear") {
+    if let Err(e) = command::run("clear") {
         return Err(e);
     }
     Ok(())
@@ -144,30 +160,17 @@ fn print_system_current_status(raw_device: &str, suffix_device_path: &str) -> Re
     println!();
     println!("Devices status");
     println!("~~~~~~~~~~~~~~");
-    if let Err(e) = run_command(&format!("ls {suffix_device_path} | grep {raw_device}")) {
+    if let Err(e) = command::run(&format!("ls {suffix_device_path} | grep {raw_device}")) {
         return Err(e);
     }
     println!("Mount status");
     println!("~~~~~~~~~~~~~~");
-    if let Err(e) = run_command(&format!("mount | grep {raw_device}")) {
+    if let Err(e) = command::run(&format!("mount | grep {raw_device}")) {
         return Err(e);
     }
     Ok(())
 }
 
-fn run_command(c: &str) -> Result<(), String> {
-    println!("Init: {}", c);
-    let output = Command::new("bash")
-        .arg("-c")
-        .arg(c)
-        .output()
-        .expect("failed to execute process");
-    if output.stderr.len() > 0 {
-        return Err(String::from_utf8_lossy(&output.stderr).to_string());
-    }
-    println!("{}", String::from_utf8_lossy(&output.stdout));
-    Ok(())
-}
 
 #[cfg(test)]
 mod tests {
@@ -175,7 +178,7 @@ mod tests {
 
     #[test]
     fn command_runs_corrrectly() {
-        let _result = match run_command(&format!("echo hi")) {
+        let _result = match command::run(&format!("echo hi")) {
             Ok(()) => {}
             Err(error) => {
                 panic!("Error: {:?}", error);
@@ -185,7 +188,7 @@ mod tests {
 
     #[test]
     fn command_raises_error() {
-        let _result = match run_command(&format!("asdf")) {
+        let _result = match command::run(&format!("asdf")) {
             Ok(()) => {
                 panic!("Error not raised");
             }
