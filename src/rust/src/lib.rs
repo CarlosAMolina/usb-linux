@@ -1,4 +1,4 @@
-mod command_line;
+pub mod command_line;
 
 use crate::command_line::command;
 
@@ -65,13 +65,6 @@ pub fn run(config: Config) -> Result<(), String> {
             help();
             return Err("invalid command".to_string());
         }
-    }
-    Ok(())
-}
-
-pub fn clear_terminal() -> Result<(), String> {
-    if let Err(e) = command::run("clear") {
-        return Err(e);
     }
     Ok(())
 }
@@ -163,7 +156,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn command_runs_corrrectly() {
+    fn command_line_command_runs_ok() {
         let _result = match command::run(&format!("echo hi")) {
             Ok(()) => {}
             Err(error) => {
@@ -173,7 +166,7 @@ mod tests {
     }
 
     #[test]
-    fn command_raises_error() {
+    fn command_line_command_raises_error() {
         let _result = match command::run(&format!("asdf")) {
             Ok(()) => {
                 panic!("Error not raised");
@@ -181,4 +174,15 @@ mod tests {
             Err(_error) => {}
         };
     }
+
+    #[test]
+    fn command_line_clear_runs_ok() {
+        let _result = match command_line::clear() {
+            Ok(()) => {}
+            Err(error) => {
+                panic!("Error: {:?}", error);
+            }
+        };
+    }
+
 }

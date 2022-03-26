@@ -4,7 +4,7 @@ use std::process;
 use rust::Config;
 
 fn main() {
-    if let Err(e) = rust::clear_terminal() {
+    if let Err(e) = rust::command_line::clear() {
         eprintln!("Problem clear terminal: {}", e);
         process::exit(1);
     }
