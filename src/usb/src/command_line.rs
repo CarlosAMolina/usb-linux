@@ -6,3 +6,14 @@ pub fn clear() -> command::CommandResult {
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn command_line_clear_runs_ok() {
+        clear().unwrap();
+    }
+}
+
