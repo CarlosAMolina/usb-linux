@@ -16,4 +16,3 @@ mod tests {
         clear().unwrap();
     }
 }
-
