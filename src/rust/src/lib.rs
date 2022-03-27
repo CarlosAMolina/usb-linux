@@ -2,7 +2,7 @@ pub mod command_line;
 
 use crate::command_line::command;
 
-pub fn run(config: Config) -> Result<(), String> {
+pub fn run(config: Config) -> command::CommandResult {
     let devices = Devices::new(&config);
     let paths = Paths::new(&config, &devices);
     // https://serverfault.com/questions/338937/differences-between-dev-sda-and-dev-sda1
@@ -133,7 +133,10 @@ Example:
     );
 }
 
-fn print_system_current_status(raw_device: &str, suffix_device_path: &str) -> Result<(), String> {
+fn print_system_current_status(
+    raw_device: &str,
+    suffix_device_path: &str,
+) -> command::CommandResult {
     println!("System current status");
     println!("---------------------");
     println!();

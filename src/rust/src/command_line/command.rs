@@ -1,6 +1,8 @@
 use std::process::Command;
 
-pub fn run(c: &str) -> Result<(), String> {
+pub type CommandResult = Result<(), String>;
+
+pub fn run(c: &str) -> CommandResult {
     println!("Init: {}", c);
     let output = Command::new("bash")
         .arg("-c")
