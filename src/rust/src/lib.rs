@@ -15,51 +15,33 @@ pub fn run(config: Config) -> command::CommandResult {
     println!("- Partition device path: {}", paths.partition_device);
     println!("- File system path: {}", paths.file_system);
     println!();
-    if let Err(e) = print_system_current_status(&devices.raw, &paths.suffix_device) {
-        return Err(e);
-    }
+    print_system_current_status(&devices.raw, &paths.suffix_device)?;
     match &config.start_or_end[..] {
         "on" => {
             println!("Init start USB");
             println!("==============");
             println!();
             // https://linuxconfig.org/howto-mount-usb-drive-in-linux
-            if let Err(e) = command::run(&format!(
+            command::run(&format!(
                 "sudo mount {} {}",
                 paths.partition_device, paths.file_system
-            )) {
-                return Err(e);
-            }
-            if let Err(e) = print_system_current_status(&devices.raw, &paths.suffix_device) {
-                return Err(e);
-            }
+            ))?;
+            print_system_current_status(&devices.raw, &paths.suffix_device)?;
         }
         "off" => {
             println!("Init end USB");
             println!("============");
             println!();
-            if let Err(e) = command::run(&format!("sudo umount {}", paths.file_system)) {
-                return Err(e);
-            };
-            if let Err(e) = print_system_current_status(&devices.raw, &paths.suffix_device) {
-                return Err(e);
-            }
+            command::run(&format!("sudo umount {}", paths.file_system))?;
+            print_system_current_status(&devices.raw, &paths.suffix_device)?;
             println!();
 
-            if let Err(e) = command::run(&format!("sudo eject {}", paths.raw_device)) {
-                return Err(e);
-            };
+            command::run(&format!("sudo eject {}", paths.raw_device))?;
             println!();
-            if let Err(e) = print_system_current_status(&devices.raw, &paths.suffix_device) {
-                return Err(e);
-            }
+            print_system_current_status(&devices.raw, &paths.suffix_device)?;
             // https://unix.stackexchange.com/questions/35508/eject-usb-drives-eject-command#83587
-            if let Err(e) = command::run(&format!("udisksctl power-off -b {}", paths.raw_device)) {
-                return Err(e);
-            };
-            if let Err(e) = print_system_current_status(&devices.raw, &paths.suffix_device) {
-                return Err(e);
-            }
+            command::run(&format!("udisksctl power-off -b {}", paths.raw_device))?;
+            print_system_current_status(&devices.raw, &paths.suffix_device)?;
         }
         _ => {
             help();
@@ -142,14 +124,10 @@ fn print_system_current_status(
     println!();
     println!("Devices status");
     println!("~~~~~~~~~~~~~~");
-    if let Err(e) = command::run(&format!("ls {suffix_device_path} | grep {raw_device}")) {
-        return Err(e);
-    }
+    command::run(&format!("ls {suffix_device_path} | grep {raw_device}"))?;
     println!("Mount status");
     println!("~~~~~~~~~~~~~~");
-    if let Err(e) = command::run(&format!("mount | grep {raw_device}")) {
-        return Err(e);
-    }
+    command::run(&format!("mount | grep {raw_device}"))?;
     Ok(())
 }
 
