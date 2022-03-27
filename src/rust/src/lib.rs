@@ -10,7 +10,7 @@ pub fn run(config: Config) -> command::CommandResult {
         paths: &paths,
     };
     devices_and_paths.print_summary();
-    print_system_current_status(&devices.raw, &paths.suffix_device)?;
+    devices_and_paths.print_system_current_status()?;
     match &config.start_or_end[..] {
         "on" => {
             println!("Init start USB");
@@ -21,22 +21,22 @@ pub fn run(config: Config) -> command::CommandResult {
                 "sudo mount {} {}",
                 paths.partition_device, paths.file_system
             ))?;
-            print_system_current_status(&devices.raw, &paths.suffix_device)?;
+            devices_and_paths.print_system_current_status()?;
         }
         "off" => {
             println!("Init end USB");
             println!("============");
             println!();
             command::run(&format!("sudo umount {}", paths.file_system))?;
-            print_system_current_status(&devices.raw, &paths.suffix_device)?;
+            devices_and_paths.print_system_current_status()?;
             println!();
 
             command::run(&format!("sudo eject {}", paths.raw_device))?;
             println!();
-            print_system_current_status(&devices.raw, &paths.suffix_device)?;
+            devices_and_paths.print_system_current_status()?;
             // https://unix.stackexchange.com/questions/35508/eject-usb-drives-eject-command#83587
             command::run(&format!("udisksctl power-off -b {}", paths.raw_device))?;
-            print_system_current_status(&devices.raw, &paths.suffix_device)?;
+            devices_and_paths.print_system_current_status()?;
         }
         _ => {
             help();
@@ -118,6 +118,23 @@ impl DevicesAndPaths<'_> {
         println!("- File system path: {}", self.paths.file_system);
         println!();
     }
+
+    fn print_system_current_status(&self) -> command::CommandResult {
+        println!("System current status");
+        println!("---------------------");
+        println!();
+        println!("Devices status");
+        println!("~~~~~~~~~~~~~~");
+        command::run(&format!(
+            "ls {} | grep {}",
+            &self.paths.suffix_device,
+            &self.devices.raw
+        ))?;
+        println!("Mount status");
+        println!("~~~~~~~~~~~~~~");
+        command::run(&format!("mount | grep {}", &self.devices.raw))?;
+        Ok(())
+    }
 }
 
 fn help() {
@@ -128,22 +145,6 @@ fn help() {
 Example:
     cargo run sdc1 on"
     );
-}
-
-fn print_system_current_status(
-    raw_device: &str,
-    suffix_device_path: &str,
-) -> command::CommandResult {
-    println!("System current status");
-    println!("---------------------");
-    println!();
-    println!("Devices status");
-    println!("~~~~~~~~~~~~~~");
-    command::run(&format!("ls {suffix_device_path} | grep {raw_device}"))?;
-    println!("Mount status");
-    println!("~~~~~~~~~~~~~~");
-    command::run(&format!("mount | grep {raw_device}"))?;
-    Ok(())
 }
 
 #[cfg(test)]
