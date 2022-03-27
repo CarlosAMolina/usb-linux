@@ -137,12 +137,7 @@ mod tests {
 
     #[test]
     fn command_line_command_runs_ok() {
-        let _result = match command::run(&format!("echo hi")) {
-            Ok(()) => {}
-            Err(error) => {
-                panic!("Error: {:?}", error);
-            }
-        };
+        command::run(&format!("echo hi")).unwrap();
     }
 
     #[test]
@@ -157,11 +152,6 @@ mod tests {
 
     #[test]
     fn command_line_clear_runs_ok() {
-        let _result = match command_line::clear() {
-            Ok(()) => {}
-            Err(error) => {
-                panic!("Error: {:?}", error);
-            }
-        };
+        command_line::clear().unwrap();
     }
 }
