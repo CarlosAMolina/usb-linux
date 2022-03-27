@@ -12,7 +12,6 @@ fn main() {
 
     let args: Vec<String> = env::args().collect();
 
-    // TODO logic repated in lib.rs
     if args.len() < 3 {
         println!("Init monitor");
         let config = MonitorConfig::new(&args).unwrap_or_else(|e| {
