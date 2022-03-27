@@ -1,7 +1,7 @@
 use std::env;
 use std::process;
 
-use monitor::Config;
+use monitor::monitor::Config;
 
 
 fn main() {
@@ -12,7 +12,7 @@ fn main() {
         process::exit(1);
     });
 
-    if let Err(e) = monitor::run(config) {
+    if let Err(e) = monitor::monitor::run(config) {
         eprintln!("Application error: {}", e);
         process::exit(1);
     };
