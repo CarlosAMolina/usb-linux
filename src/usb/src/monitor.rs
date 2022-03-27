@@ -1,10 +1,9 @@
-pub fn run(config: Config) -> Result<(), String> {
+use crate::command_line::command;
+
+pub fn run(config: Config) -> command::CommandResult {
     let path = String::from(&config.path);
     if must_notify_the_path(&path) {
-        println!("Path: {}", path);
-    }
-    if false {
-        return Err("TODO".to_string());
+        notify(&path)?;
     }
     Ok(())
 }
@@ -39,17 +38,31 @@ fn must_notify_the_path(path: &str) -> bool {
     return path.starts_with("/dev/sd") & path.chars().last().unwrap().is_digit(10);
 }
 
+pub fn notify(path: &str) -> command::CommandResult {
+    let icon = "/usr/share/icons/Adwaita/48x48/devices/drive-removable-media.png";
+    command::run(&format!(
+        "dunstify 'New device' '{}' -u normal -i '{}'",
+        &path, &icon
+    ))?;
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn must_notify_the_path_is_true() {
-        assert_eq!(true, must_notify_the_path(&"/dev/sd1".to_string()));
+        assert_eq!(true, must_notify_the_path(&"/dev/sda1".to_string()));
     }
 
     #[test]
     fn must_notify_the_path_is_false() {
-        assert_eq!(false, must_notify_the_path(&"/dev/sd".to_string()));
+        assert_eq!(false, must_notify_the_path(&"/dev/sda".to_string()));
+    }
+
+    #[test]
+    fn notify_runs_ok() {
+        notify("sda1").unwrap();
     }
 }

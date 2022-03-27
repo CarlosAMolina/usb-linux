@@ -11,6 +11,7 @@ export XDG_RUNTIME_DIR="/run/user/1000"
 inotifywait -m -e create /dev/ | while read line
 do
     device=$(echo $line | awk '{print $NF}')
-    dunstify 'New device' "$device" -u normal -i '/usr/share/icons/Adwaita/48x48/devices/drive-removable-media.png'
+    cd $HOME/Software/usb-linux/src/usb/
+    cargo run $device
 done
 

@@ -5,11 +5,6 @@ use usb::monitor::Config as MonitorConfig;
 use usb::on_off::Config as OnOffConfig;
 
 fn main() {
-    if let Err(e) = usb::command_line::clear() {
-        eprintln!("Problem clear terminal: {}", e);
-        process::exit(1);
-    }
-
     let args: Vec<String> = env::args().collect();
 
     if args.len() < 3 {
@@ -23,6 +18,10 @@ fn main() {
             process::exit(1);
         };
     } else {
+        if let Err(e) = usb::command_line::clear() {
+            eprintln!("Problem clear terminal: {}", e);
+            process::exit(1);
+        }
         println!("Init on-off");
         let config = OnOffConfig::new(&args).unwrap_or_else(|e| {
             eprintln!("Problem parsing arguments: {}", e);
