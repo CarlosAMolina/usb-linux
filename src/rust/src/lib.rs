@@ -5,16 +5,11 @@ use crate::command_line::command;
 pub fn run(config: Config) -> command::CommandResult {
     let devices = Devices::new(&config);
     let paths = Paths::new(&config, &devices);
-    // https://serverfault.com/questions/338937/differences-between-dev-sda-and-dev-sda1
-    println!("Summary");
-    println!("=======");
-    println!();
-    println!("- Raw device: {}", devices.raw);
-    println!("- Raw device path: {}", paths.raw_device);
-    println!("- Partition device: {}", devices.partition);
-    println!("- Partition device path: {}", paths.partition_device);
-    println!("- File system path: {}", paths.file_system);
-    println!();
+    let devices_and_paths = DevicesAndPaths {
+        devices: &devices,
+        paths: &paths,
+    };
+    devices_and_paths.print_summary();
     print_system_current_status(&devices.raw, &paths.suffix_device)?;
     match &config.start_or_end[..] {
         "on" => {
@@ -102,6 +97,26 @@ impl Paths {
             partition_device: format!("{suffix_device_path}/{}", config.partition_device),
             file_system: String::from("/media/usb"),
         }
+    }
+}
+
+struct DevicesAndPaths<'a> {
+    devices: &'a Devices,
+    paths: &'a Paths,
+}
+
+impl DevicesAndPaths<'_> {
+    // https://serverfault.com/questions/338937/differences-between-dev-sda-and-dev-sda1
+    fn print_summary(&self) {
+        println!("Summary");
+        println!("=======");
+        println!();
+        println!("- Raw device: {}", self.devices.raw);
+        println!("- Raw device path: {}", self.paths.raw_device);
+        println!("- Partition device: {}", self.devices.partition);
+        println!("- Partition device path: {}", self.paths.partition_device);
+        println!("- File system path: {}", self.paths.file_system);
+        println!();
     }
 }
 
