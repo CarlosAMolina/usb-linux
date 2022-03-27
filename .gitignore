@@ -1,4 +1,6 @@
+# Rust
+/src/usb/target
+
+# Vim
 *.swp
-/src/rust/target
-/src/monitor/target
 

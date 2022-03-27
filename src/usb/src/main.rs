@@ -1,11 +1,11 @@
 use std::env;
 use std::process;
 
-use rust::Config;
-use rust::monitor::Config as MonitorConfig;
+use usb::Config;
+use usb::monitor::Config as MonitorConfig;
 
 fn main() {
-    if let Err(e) = rust::command_line::clear() {
+    if let Err(e) = usb::command_line::clear() {
         eprintln!("Problem clear terminal: {}", e);
         process::exit(1);
     }
@@ -20,7 +20,7 @@ fn main() {
             process::exit(1);
         });
 
-        if let Err(e) = rust::monitor::run(config) {
+        if let Err(e) = usb::monitor::run(config) {
             eprintln!("Application error: {}", e);
             process::exit(1);
         };
@@ -31,7 +31,7 @@ fn main() {
             process::exit(1);
         });
 
-        if let Err(e) = rust::run(config) {
+        if let Err(e) = usb::run(config) {
             eprintln!("Application error: {}", e);
             process::exit(1);
         };
