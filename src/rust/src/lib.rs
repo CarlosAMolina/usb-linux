@@ -3,12 +3,7 @@ pub mod command_line;
 use crate::command_line::command;
 
 pub fn run(config: Config) -> command::CommandResult {
-    let devices = Devices::new(&config);
-    let paths = Paths::new(&config, &devices);
-    let devices_and_paths = DevicesAndPaths {
-        devices: &devices,
-        paths: &paths,
-    };
+    let devices_and_paths = DevicesAndPaths::new(&config);
     devices_and_paths.print_summary();
     devices_and_paths.print_system_current_status()?;
     match &config.start_or_end[..] {
@@ -19,7 +14,7 @@ pub fn run(config: Config) -> command::CommandResult {
             // https://linuxconfig.org/howto-mount-usb-drive-in-linux
             command::run(&format!(
                 "sudo mount {} {}",
-                paths.partition_device, paths.file_system
+                devices_and_paths.paths.partition_device, devices_and_paths.paths.file_system
             ))?;
             devices_and_paths.print_system_current_status()?;
         }
@@ -27,15 +22,15 @@ pub fn run(config: Config) -> command::CommandResult {
             println!("Init end USB");
             println!("============");
             println!();
-            command::run(&format!("sudo umount {}", paths.file_system))?;
+            command::run(&format!("sudo umount {}", devices_and_paths.paths.file_system))?;
             devices_and_paths.print_system_current_status()?;
             println!();
 
-            command::run(&format!("sudo eject {}", paths.raw_device))?;
+            command::run(&format!("sudo eject {}", devices_and_paths.paths.raw_device))?;
             println!();
             devices_and_paths.print_system_current_status()?;
             // https://unix.stackexchange.com/questions/35508/eject-usb-drives-eject-command#83587
-            command::run(&format!("udisksctl power-off -b {}", paths.raw_device))?;
+            command::run(&format!("udisksctl power-off -b {}", devices_and_paths.paths.raw_device))?;
             devices_and_paths.print_system_current_status()?;
         }
         _ => {
@@ -100,12 +95,19 @@ impl Paths {
     }
 }
 
-struct DevicesAndPaths<'a> {
-    devices: &'a Devices,
-    paths: &'a Paths,
+struct DevicesAndPaths {
+    devices: Devices,
+    paths: Paths,
 }
 
-impl DevicesAndPaths<'_> {
+impl DevicesAndPaths {
+    fn new(config: &Config) -> DevicesAndPaths {
+        DevicesAndPaths {
+            devices: Devices::new(&config),
+            paths: Paths::new(&config, &Devices::new(&config)),
+        }
+    }
+
     // https://serverfault.com/questions/338937/differences-between-dev-sda-and-dev-sda1
     fn print_summary(&self) {
         println!("Summary");
