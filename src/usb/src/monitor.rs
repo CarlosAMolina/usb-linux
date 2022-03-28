@@ -29,7 +29,7 @@ fn must_notify_the_path(path: &str) -> bool {
     return path.starts_with("sd") & path.chars().last().unwrap().is_digit(10);
 }
 
-pub fn notify(path: &str) -> command::CommandResult {
+fn notify(path: &str) -> command::CommandResult {
     let icon = "/usr/share/icons/Adwaita/48x48/devices/drive-removable-media.png";
     command::run(&format!(
         "dunstify 'New device' '{}' -u normal -i '{}'",
