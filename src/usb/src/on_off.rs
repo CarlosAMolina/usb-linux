@@ -22,7 +22,7 @@ pub fn run(config: Config) -> command::CommandResult {
             println!();
             command::run(&format!(
                 "sudo umount {}",
-                devices_and_paths.paths.file_system
+                devices_and_paths.paths.partition_device
             ))?;
             devices_and_paths.print_system_current_status()?;
             println!();
