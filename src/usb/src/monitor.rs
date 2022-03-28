@@ -6,6 +6,7 @@ pub fn run(config: Config) -> command::CommandResult {
     if must_notify_the_path(&path) {
         println!("Notify path: yes");
         notify(&path)?;
+        command::run("open /media/usb/ &")?;
     }
     println!("Notify path: no");
     Ok(())
