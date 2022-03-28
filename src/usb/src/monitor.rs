@@ -15,23 +15,11 @@ pub struct Config {
 impl Config {
     pub fn new(args: &[String]) -> Result<Config, &'static str> {
         if args.len() != 2 {
-            help();
             return Err("not enough arguments");
         }
         let path = args[1].clone();
-
         Ok(Config { path })
     }
-}
-
-fn help() {
-    eprintln!(
-        "Usage:
-    cargo run <string>
-        Notify a device's path if required.
-Example:
-    cargo run /dev/sdc1"
-    );
 }
 
 fn must_notify_the_path(path: &str) -> bool {

@@ -41,7 +41,6 @@ pub fn run(config: Config) -> command::CommandResult {
             devices_and_paths.print_system_current_status()?;
         }
         _ => {
-            help();
             return Err("invalid command".to_string());
         }
     }
@@ -56,7 +55,6 @@ pub struct Config {
 impl Config {
     pub fn new(args: &[String]) -> Result<Config, &'static str> {
         if args.len() != 3 {
-            help();
             return Err("not enough arguments");
         }
         let partition_device = args[1].clone();
@@ -143,16 +141,6 @@ impl DevicesAndPaths {
         command::run(&format!("mount | grep {}", &self.devices.raw))?;
         Ok(())
     }
-}
-
-fn help() {
-    eprintln!(
-        "Usage:
-    cargo run <string> {{on|off}}
-        Start or end an USB device.
-Example:
-    cargo run sdc1 on"
-    );
 }
 
 #[cfg(test)]
