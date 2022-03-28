@@ -2,9 +2,12 @@ use crate::command_line::command;
 
 pub fn run(config: Config) -> command::CommandResult {
     let path = String::from(&config.path);
+    println!("Path to check: {}", path);
     if must_notify_the_path(&path) {
+        println!("Notify path: yes");
         notify(&path)?;
     }
+    println!("Notify path: no");
     Ok(())
 }
 
