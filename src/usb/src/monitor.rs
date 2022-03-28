@@ -26,7 +26,7 @@ impl Config {
 }
 
 fn must_notify_the_path(path: &str) -> bool {
-    return path.starts_with("/dev/sd") & path.chars().last().unwrap().is_digit(10);
+    return path.starts_with("sd") & path.chars().last().unwrap().is_digit(10);
 }
 
 pub fn notify(path: &str) -> command::CommandResult {
@@ -44,12 +44,12 @@ mod tests {
 
     #[test]
     fn must_notify_the_path_is_true() {
-        assert_eq!(true, must_notify_the_path(&"/dev/sda1".to_string()));
+        assert_eq!(true, must_notify_the_path(&"sda1".to_string()));
     }
 
     #[test]
     fn must_notify_the_path_is_false() {
-        assert_eq!(false, must_notify_the_path(&"/dev/sda".to_string()));
+        assert_eq!(false, must_notify_the_path(&"sda".to_string()));
     }
 
     #[test]
