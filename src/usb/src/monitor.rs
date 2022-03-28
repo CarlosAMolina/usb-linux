@@ -1,4 +1,6 @@
 use crate::command_line::command;
+//TODO automount) use crate::on_off::Config as OnOffConfig;
+
 
 pub fn run(config: Config) -> command::CommandResult {
     let path = String::from(&config.path);
@@ -6,9 +8,11 @@ pub fn run(config: Config) -> command::CommandResult {
     if must_notify_the_path(&path) {
         println!("Notify path: yes");
         notify(&path)?;
-        command::run("open /media/usb/ &")?;
+        // TODO automount) let config = OnOffConfig::new(&["".to_string(), path, "on".to_string()])?;
+        // TODO aouto open) command::run("open /media/usb/ &")?;
+    } else {
+        println!("Notify path: no");
     }
-    println!("Notify path: no");
     Ok(())
 }
 
