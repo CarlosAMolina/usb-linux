@@ -22,6 +22,13 @@ fn get_mounted_path(text: String) -> String {
     caps["path"].to_string()
 }
 
+pub fn unmount_device(device: &str) -> command::CommandResult {
+    command::run(&format!(
+        "udisksctl unmount -b {}",
+        device
+    ))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

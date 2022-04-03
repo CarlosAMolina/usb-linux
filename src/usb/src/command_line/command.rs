@@ -30,7 +30,7 @@ mod tests {
     #[test]
     fn run_raises_error() {
         let _result = match run(&format!("asdf")) {
-            Ok(command_result) => {
+            Ok(_command_result) => {
                 panic!("Error not raised");
             }
             Err(_error) => {}
