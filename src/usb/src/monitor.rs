@@ -8,7 +8,6 @@ pub fn run(config: Config) -> command::CommandResult {
         println!("Notify path: yes");
         notify(&path)?;
         // TODO automount) let config = OnOffConfig::new(&["".to_string(), path, "on".to_string()])?;
-        // TODO aouto open) command::run("open /media/usb/ &")?;
     } else {
         println!("Notify path: no");
     }

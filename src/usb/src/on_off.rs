@@ -73,7 +73,6 @@ struct Paths {
     suffix_device: String,
     raw_device: String,
     partition_device: String,
-    file_system: String,
 }
 
 impl Paths {
@@ -83,7 +82,6 @@ impl Paths {
             suffix_device: String::from(suffix_device_path),
             raw_device: format!("{suffix_device_path}/{}", devices.raw),
             partition_device: format!("{suffix_device_path}/{}", config.partition_device),
-            file_system: String::from("/media/usb"),
         }
     }
 }
@@ -110,7 +108,6 @@ impl DevicesAndPaths {
         println!("- Raw device path: {}", self.paths.raw_device);
         println!("- Partition device: {}", self.devices.partition);
         println!("- Partition device path: {}", self.paths.partition_device);
-        println!("- File system path: {}", self.paths.file_system);
         println!();
     }
 
