@@ -1,8 +1,6 @@
 use std::process::Command;
 
-use regex::Regex;
-
-pub type CommandResult = Result<(), String>;
+pub type CommandResult = Result<String, String>;
 
 pub fn run(c: &str) -> CommandResult {
     println!("Init: {}", c);
@@ -19,33 +17,23 @@ pub fn run(c: &str) -> CommandResult {
     println!("{}", output_str); // TODO
     //let v: Vec<&str> = output_str.split(' ').collect(); // TODO
     //println!("{:?}", v); // TODO
-    Ok(())
+    Ok(output_str.to_string())
 }
 
-fn get_mounted_path(text: String) -> String {
-    let re = Regex::new(r"\sat\s(?P<path>.*)\.$").unwrap();
-    let caps = re.captures(&text).unwrap();
-    caps["path"].to_string()
-}
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn command_line_command_runs_ok() {
-        run(&format!("udisksctl mount -b /dev/sda1")).unwrap();
+    fn run_runs_ok() {
+        assert_eq!("hi\n", run("echo hi").unwrap());
     }
 
     #[test]
-    fn get_mounted_path_runs_ok() {
-        assert_eq!("/media/foo/12abc-34a", get_mounted_path("Mounted /dev/sdb1 at /media/foo/12abc-34a.".to_string()));
-    }
-
-    #[test]
-    fn command_line_command_raises_error() {
+    fn run_raises_error() {
         let _result = match run(&format!("asdf")) {
-            Ok(()) => {
+            Ok(command_result) => {
                 panic!("Error not raised");
             }
             Err(_error) => {}

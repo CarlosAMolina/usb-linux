@@ -13,7 +13,7 @@ pub fn run(config: Config) -> command::CommandResult {
     } else {
         println!("Notify path: no");
     }
-    Ok(())
+    Ok("Ok".to_string())
 }
 
 pub struct Config {
@@ -41,7 +41,7 @@ fn notify(path: &str) -> command::CommandResult {
         "dunstify 'New device' '{}' -u normal -i '{}'",
         &path, &icon
     ))?;
-    Ok(())
+    Ok("Ok".to_string())
 }
 
 #[cfg(test)]

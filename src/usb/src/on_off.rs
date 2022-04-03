@@ -46,7 +46,7 @@ pub fn run(config: Config) -> command::CommandResult {
             return Err("invalid command".to_string());
         }
     }
-    Ok(())
+    Ok("Ok".to_string())
 }
 
 pub struct Config {
@@ -141,6 +141,6 @@ impl DevicesAndPaths {
         println!("Mount status");
         println!("~~~~~~~~~~~~~~");
         command::run(&format!("mount | grep {}", &self.devices.raw))?;
-        Ok(())
+        Ok("Ok".to_string())
     }
 }
