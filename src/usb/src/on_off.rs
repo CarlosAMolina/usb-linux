@@ -10,6 +10,7 @@ pub fn run(config: Config) -> command::CommandResult {
             println!("==============");
             println!();
             // https://linuxconfig.org/howto-mount-usb-drive-in-linux
+            // udisksctl mount -b /dev/sda1
             command::run(&format!(
                 "sudo mount {} {}",
                 devices_and_paths.paths.partition_device, devices_and_paths.paths.file_system
@@ -27,6 +28,7 @@ pub fn run(config: Config) -> command::CommandResult {
             devices_and_paths.print_system_current_status()?;
             println!();
 
+            // udisksctl unmount -b /dev/sda1
             command::run(&format!(
                 "sudo eject {}",
                 devices_and_paths.paths.raw_device
@@ -140,25 +142,5 @@ impl DevicesAndPaths {
         println!("~~~~~~~~~~~~~~");
         command::run(&format!("mount | grep {}", &self.devices.raw))?;
         Ok(())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn command_line_command_runs_ok() {
-        command::run(&format!("echo hi")).unwrap();
-    }
-
-    #[test]
-    fn command_line_command_raises_error() {
-        let _result = match command::run(&format!("asdf")) {
-            Ok(()) => {
-                panic!("Error not raised");
-            }
-            Err(_error) => {}
-        };
     }
 }
