@@ -12,11 +12,8 @@ pub fn run(c: &str) -> CommandResult {
     if output.stderr.len() > 0 {
         return Err(String::from_utf8_lossy(&output.stderr).to_string());
     }
-    println!("{}", String::from_utf8_lossy(&output.stdout));
-    let output_str = String::from_utf8_lossy(&output.stdout); // TODO
-    println!("{}", output_str); // TODO
-    //let v: Vec<&str> = output_str.split(' ').collect(); // TODO
-    //println!("{:?}", v); // TODO
+    let output_str = String::from_utf8_lossy(&output.stdout);
+    println!("{}", output_str);
     Ok(output_str.to_string())
 }
 

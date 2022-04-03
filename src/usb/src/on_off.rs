@@ -1,6 +1,6 @@
-use crate::command_line::command;
+use crate::command_line;
 
-pub fn run(config: Config) -> command::CommandResult {
+pub fn run(config: Config) -> command_line::command::CommandResult {
     let devices_and_paths = DevicesAndPaths::new(&config);
     devices_and_paths.print_summary();
     devices_and_paths.print_system_current_status()?;
@@ -9,19 +9,16 @@ pub fn run(config: Config) -> command::CommandResult {
             println!("Init start USB");
             println!("==============");
             println!();
-            // https://linuxconfig.org/howto-mount-usb-drive-in-linux
-            // udisksctl mount -b /dev/sda1
-            command::run(&format!(
-                "sudo mount {} {}",
-                devices_and_paths.paths.partition_device, devices_and_paths.paths.file_system
-            ))?;
+            command_line::mount_device(
+                &devices_and_paths.paths.partition_device
+            )?;
             devices_and_paths.print_system_current_status()?;
         }
         "off" => {
             println!("Init end USB");
             println!("============");
             println!();
-            command::run(&format!(
+            command_line::command::run(&format!(
                 "sudo umount {}",
                 devices_and_paths.paths.partition_device
             ))?;
@@ -29,14 +26,14 @@ pub fn run(config: Config) -> command::CommandResult {
             println!();
 
             // udisksctl unmount -b /dev/sda1
-            command::run(&format!(
+            command_line::command::run(&format!(
                 "sudo eject {}",
                 devices_and_paths.paths.raw_device
             ))?;
             println!();
             devices_and_paths.print_system_current_status()?;
             // https://unix.stackexchange.com/questions/35508/eject-usb-drives-eject-command#83587
-            command::run(&format!(
+            command_line::command::run(&format!(
                 "udisksctl power-off -b {}",
                 devices_and_paths.paths.raw_device
             ))?;
@@ -128,19 +125,19 @@ impl DevicesAndPaths {
         println!();
     }
 
-    fn print_system_current_status(&self) -> command::CommandResult {
+    fn print_system_current_status(&self) -> command_line::command::CommandResult {
         println!("System current status");
         println!("---------------------");
         println!();
         println!("Devices status");
         println!("~~~~~~~~~~~~~~");
-        command::run(&format!(
+        command_line::command::run(&format!(
             "ls {} | grep {}",
             &self.paths.suffix_device, &self.devices.raw
         ))?;
         println!("Mount status");
         println!("~~~~~~~~~~~~~~");
-        command::run(&format!("mount | grep {}", &self.devices.raw))?;
+        command_line::command::run(&format!("mount | grep {}", &self.devices.raw))?;
         Ok("Ok".to_string())
     }
 }
