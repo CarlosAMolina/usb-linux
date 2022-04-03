@@ -36,6 +36,7 @@ fn must_notify_the_path(path: &str) -> bool {
 
 fn notify(path: &str) -> command::CommandResult {
     let icon = "/usr/share/icons/Adwaita/48x48/devices/drive-removable-media.png";
+    // "notify-send 'New device' '{}' -u normal -i '{}'", // TODO add for ubuntu
     command::run(&format!(
         "dunstify 'New device' '{}' -u normal -i '{}'",
         &path, &icon
