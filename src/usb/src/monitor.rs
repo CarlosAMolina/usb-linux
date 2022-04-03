@@ -1,7 +1,6 @@
 use crate::command_line::command;
 //TODO automount) use crate::on_off::Config as OnOffConfig;
 
-
 pub fn run(config: Config) -> command::CommandResult {
     let path = String::from(&config.path);
     println!("Path to check: {}", path);

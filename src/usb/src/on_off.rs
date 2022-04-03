@@ -9,18 +9,14 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
             println!("Init start USB");
             println!("==============");
             println!();
-            command_line::mount_device(
-                &devices_and_paths.paths.partition_device
-            )?;
+            command_line::mount_device(&devices_and_paths.paths.partition_device)?;
             devices_and_paths.print_system_current_status()?;
         }
         "off" => {
             println!("Init end USB");
             println!("============");
             println!();
-            command_line::unmount_device(
-                &devices_and_paths.paths.partition_device
-            )?;
+            command_line::unmount_device(&devices_and_paths.paths.partition_device)?;
             devices_and_paths.print_system_current_status()?;
             println!();
 

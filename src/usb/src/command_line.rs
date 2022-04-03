@@ -23,10 +23,7 @@ fn get_mounted_path(text: String) -> String {
 }
 
 pub fn unmount_device(device: &str) -> command::CommandResult {
-    command::run(&format!(
-        "udisksctl unmount -b {}",
-        device
-    ))
+    command::run(&format!("udisksctl unmount -b {}", device))
 }
 
 #[cfg(test)]
@@ -45,6 +42,9 @@ mod tests {
 
     #[test]
     fn get_mounted_path_runs_ok() {
-        assert_eq!("/media/foo/12abc-34a", get_mounted_path("Mounted /dev/sdb1 at /media/foo/12abc-34a\n".to_string()));
+        assert_eq!(
+            "/media/foo/12abc-34a",
+            get_mounted_path("Mounted /dev/sdb1 at /media/foo/12abc-34a\n".to_string())
+        );
     }
 }

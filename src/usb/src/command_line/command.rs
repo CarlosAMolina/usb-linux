@@ -17,7 +17,6 @@ pub fn run(c: &str) -> CommandResult {
     Ok(output_str.to_string())
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
