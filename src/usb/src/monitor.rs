@@ -1,13 +1,12 @@
-use crate::command_line::command;
-//TODO automount) use crate::on_off::Config as OnOffConfig;
+use crate::command_line;
 
-pub fn run(config: Config) -> command::CommandResult {
+pub fn run(config: Config) -> command_line::command::CommandResult {
     let path = String::from(&config.path);
     println!("Path to check: {}", path);
     if must_notify_the_path(&path) {
         println!("Notify path: yes");
-        notify(&path)?;
-        // TODO automount) let config = OnOffConfig::new(&["".to_string(), path, "on".to_string()])?;
+        let mounted_path = command_line::mount_device(&format!("/dev/{}", path))?;
+        notify(&path, &mounted_path)?;
     } else {
         println!("Notify path: no");
     }
@@ -32,12 +31,12 @@ fn must_notify_the_path(path: &str) -> bool {
     return path.starts_with("sd") & path.chars().last().unwrap().is_digit(10);
 }
 
-fn notify(path: &str) -> command::CommandResult {
+fn notify(device: &str, mounted_path: &str) -> command_line::command::CommandResult {
     let icon = "/usr/share/icons/Adwaita/48x48/devices/drive-removable-media.png";
     // "notify-send 'New device' '{}' -u normal -i '{}'", // TODO add for ubuntu
-    command::run(&format!(
-        "dunstify 'New device' '{}' -u normal -i '{}'",
-        &path, &icon
+    command_line::command::run(&format!(
+        "dunstify 'New device' '{}\nMounted at {}' -u normal -i '{}'",
+        &device, &mounted_path, &icon
     ))?;
     Ok("Ok".to_string())
 }
@@ -58,6 +57,6 @@ mod tests {
 
     #[test]
     fn notify_runs_ok() {
-        notify("sda1").unwrap();
+        notify("sda1", "/media/foo/asdfasdfasdfasdfasfasfsaf").unwrap();
     }
 }
