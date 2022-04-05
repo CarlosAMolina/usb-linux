@@ -1,3 +1,5 @@
+use std::{thread, time::Duration};
+
 use crate::command_line;
 
 pub fn run(config: Config) -> command_line::command::CommandResult {
@@ -5,6 +7,9 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
     println!("Path to check: {}", path);
     if must_notify_the_path(&path) {
         println!("Notify path: yes");
+        // Fix Error looking up object for device
+        // https://github.com/storaged-project/udisks/issues/711
+        thread::sleep(Duration::from_secs(2));
         let mounted_path = command_line::mount_device(&format!("/dev/{}", path))?;
         notify(&path, &mounted_path)?;
     } else {
