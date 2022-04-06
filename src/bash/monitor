@@ -1,16 +1,15 @@
 #!/usr/bin/bash
 #
 # Notify when a new device is detected
+# https://wiki.archlinux.org/title/Udisks#udevadm_monitor
 
-# Config
-# Set the same values as you have in a terminal session
-export DISPLAY=":0"
-export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/1000/bus"
-export XDG_RUNTIME_DIR="/run/user/1000"
+pathtoname() {
+    udevadm info -p /sys/"$1" | awk -v FS== '/DEVNAME/ {print $2}'
+}
 
-inotifywait -m -e create /dev/ | while read line
-do
-    device=$(echo $line | awk '{print $NF}')
-    usb $device
+stdbuf -oL -- udevadm monitor --udev -s block | while read -r -- _ _ event devpath _; do
+        if [ "$event" = add ]; then
+            devname=$(pathtoname "$devpath") # Example: /dev/sdb1
+            usb $devname
+        fi
 done
-

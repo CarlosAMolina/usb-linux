@@ -1,5 +1,3 @@
-use std::{thread, time::Duration};
-
 use crate::command_line;
 
 pub fn run(config: Config) -> command_line::command::CommandResult {
@@ -7,10 +5,7 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
     println!("Path to check: {}", path);
     if must_notify_the_path(&path) {
         println!("Notify path: yes");
-        // Fix Error looking up object for device
-        // https://github.com/storaged-project/udisks/issues/711
-        thread::sleep(Duration::from_secs(2));
-        let mounted_path = command_line::mount_device(&format!("/dev/{}", path))?;
+        let mounted_path = command_line::mount_device(&path)?;
         notify(&path, &mounted_path)?;
     } else {
         println!("Notify path: no");
@@ -33,7 +28,7 @@ impl Config {
 }
 
 fn must_notify_the_path(path: &str) -> bool {
-    return path.starts_with("sd") & path.chars().last().unwrap().is_digit(10);
+    return path.starts_with("/dev/sd") & path.chars().last().unwrap().is_digit(10);
 }
 
 fn notify(device: &str, mounted_path: &str) -> command_line::command::CommandResult {
@@ -51,16 +46,16 @@ mod tests {
 
     #[test]
     fn must_notify_the_path_is_true() {
-        assert_eq!(true, must_notify_the_path(&"sda1".to_string()));
+        assert_eq!(true, must_notify_the_path(&"/dev/sda1".to_string()));
     }
 
     #[test]
     fn must_notify_the_path_is_false() {
-        assert_eq!(false, must_notify_the_path(&"sda".to_string()));
+        assert_eq!(false, must_notify_the_path(&"/dev/sda".to_string()));
     }
 
     #[test]
     fn notify_runs_ok() {
-        notify("sda1", "/media/foo/asdfasdfasdfasdfasfasfsaf").unwrap();
+        notify("/dev/sda1", "/media/foo/asdfasdfasdfasdfasfasfsaf").unwrap();
     }
 }

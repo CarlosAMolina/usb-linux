@@ -70,18 +70,15 @@ impl Devices {
 }
 
 struct Paths {
-    suffix_device: String,
     raw_device: String,
     partition_device: String,
 }
 
 impl Paths {
     pub fn new(config: &Config, devices: &Devices) -> Paths {
-        let suffix_device_path = "/dev";
         Paths {
-            suffix_device: String::from(suffix_device_path),
-            raw_device: format!("{suffix_device_path}/{}", devices.raw),
-            partition_device: format!("{suffix_device_path}/{}", config.partition_device),
+            raw_device: devices.raw.to_string(),
+            partition_device: config.partition_device.to_string(),
         }
     }
 }
@@ -117,10 +114,7 @@ impl DevicesAndPaths {
         println!();
         println!("Devices status");
         println!("~~~~~~~~~~~~~~");
-        command_line::command::run(&format!(
-            "ls {} | grep {}",
-            &self.paths.suffix_device, &self.devices.raw
-        ))?;
+        command_line::command::run(&format!("ls /dev/ | grep {}", &self.devices.raw))?;
         println!("Mount status");
         println!("~~~~~~~~~~~~~~");
         command_line::command::run(&format!("mount | grep {}", &self.devices.raw))?;

@@ -52,6 +52,6 @@ fn help() {
         cargo run <string> {{on|off}}
             Start or end an USB device.
         Example:
-            cargo run sdc1 on"
+            cargo run /dev/sdc1 on"
     );
 }
