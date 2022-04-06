@@ -114,7 +114,7 @@ impl DevicesAndPaths {
         println!();
         println!("Devices status");
         println!("~~~~~~~~~~~~~~");
-        command_line::command::run(&format!("ls /dev/ | grep {}", &self.devices.raw))?;
+        command_line::command::run(&format!("ls /dev/* | grep {}", &self.devices.raw))?;
         println!("Mount status");
         println!("~~~~~~~~~~~~~~");
         command_line::command::run(&format!("mount | grep {}", &self.devices.raw))?;
