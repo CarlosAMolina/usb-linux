@@ -34,9 +34,9 @@ fn must_notify_the_path(path: &str) -> bool {
 }
 
 fn notify(device: &str, mounted_path: &str) -> command_line::command::CommandResult {
-    let mut icon = "/usr/share/icons/Adwaita/48x48/devices/media-removable-symbolic.symbolic.png";
+    let mut icon = "/usr/share/icons/Adwaita/48x48/devices/drive-removable-media.png";
     if !Path::new(icon).exists() {
-        icon = "/usr/share/icons/Adwaita/48x48/devices/drive-removable-media.png";
+        icon = "/usr/share/icons/Adwaita/48x48/devices/media-removable-symbolic.symbolic.png";
     }
     command_line::command::run(&format!(
         "notify-send 'New device' '{}\nMounted at {}' -u normal -i '{}'",
