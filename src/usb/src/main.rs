@@ -45,7 +45,7 @@ fn help() {
         "Usage
     Option monitor
         cargo run <string>
-            Notify a device's path if required.
+            Notify a device's path and mount it if required.
         Example:
             cargo run /dev/sdc1
     Option on_off
