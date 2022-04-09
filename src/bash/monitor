@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 #
-# Notify when a new device is detected
-# https://wiki.archlinux.org/title/Udisks#udevadm_monitor
+# This script detects and manages new devices
+# Detect new devices: https://wiki.archlinux.org/title/Udisks#udevadm_monitor
 
 pathtoname() {
     udevadm info -p /sys/"$1" | awk -v FS== '/DEVNAME/ {print $2}'
