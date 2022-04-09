@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.3.0] - 2022-04-09
 ### Added
 - Automatically mount a detected device.
+- Notify a detected device.
 - Docs URL.
  
 ### Changed
