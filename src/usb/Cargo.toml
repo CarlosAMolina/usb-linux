@@ -1,7 +1,12 @@
 [package]
 name = "usb"
-version = "0.1.0"
+version = "0.3.0"
+authors = ["CarlosAMolina"]
 edition = "2021"
+description = "Manage USB devices on Gnu/Linux systems"
+documentation = "https://carlosamolina.github.io/projects/usb-linux/usb-linux.html"
+repository = "https://github.com/CarlosAMolina/usb-linux"
+keywords = ["usb", "mount", "udisksctl"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
