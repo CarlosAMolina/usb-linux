@@ -3,7 +3,7 @@ use std::process::Command;
 pub type CommandResult = Result<String, String>;
 
 pub fn run(c: &str) -> CommandResult {
-    println!("Init: {}", c);
+    log::debug!("Init: {}", c);
     let output = Command::new("bash")
         .arg("-c")
         .arg(c)
