@@ -10,7 +10,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     if args.len() == 2 {
-        if args[1] == "-h" {
+        if args[1] == "-h" || args[1] == "help" {
             help();
             process::exit(process_status_code::OK_EXIT_CODE);
         } else {
@@ -51,7 +51,7 @@ fn help() {
     eprintln!(
         "Usage
     Option help
-        cargo run -- -h
+        cargo run -- {{-h|help}}
             Shows help
         Example:
             cargo run -- -h
