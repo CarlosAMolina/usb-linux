@@ -4,13 +4,13 @@ use crate::command_line;
 
 pub fn run(config: Config) -> command_line::command::CommandResult {
     let path = String::from(&config.path);
-    println!("Path to check: {}", path);
+    log::debug!("Path to check: {}", path);
     if must_notify_the_path(&path) {
-        println!("Notify path: yes");
+        log::debug!("Notify path: yes");
         let mounted_path = command_line::mount_device(&path)?;
         notify(&path, &mounted_path)?;
     } else {
-        println!("Notify path: no");
+        log::debug!("Notify path: no");
     }
     Ok("Ok".to_string())
 }
