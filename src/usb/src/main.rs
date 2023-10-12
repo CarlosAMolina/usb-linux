@@ -8,16 +8,21 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     if args.len() == 2 {
-        println!("Init monitor");
-        let config = MonitorConfig::new(&args).unwrap_or_else(|e| {
-            eprintln!("Problem parsing arguments: {}", e);
+        if args[1] == "-h" {
             help();
-            process::exit(1);
-        });
-        if let Err(e) = usb::monitor::run(config) {
-            eprintln!("Application error: {}", e);
-            process::exit(1);
-        };
+            process::exit(0);
+        } else {
+            println!("Init monitor");
+            let config = MonitorConfig::new(&args).unwrap_or_else(|e| {
+                eprintln!("Problem parsing arguments: {}", e);
+                help();
+                process::exit(1);
+            });
+            if let Err(e) = usb::monitor::run(config) {
+                eprintln!("Application error: {}", e);
+                process::exit(1);
+            };
+        }
     } else if args.len() == 3 {
         if let Err(e) = usb::command_line::clear() {
             eprintln!("Problem clear terminal: {}", e);
@@ -43,6 +48,11 @@ fn main() {
 fn help() {
     eprintln!(
         "Usage
+    Option help
+        cargo run -- -h
+            Shows help
+        Example:
+            cargo run -- -h
     Option monitor
         cargo run <string>
             Notify a device's path and mount it if required.
