@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use crate::command_line;
 
 pub fn run(config: Config) -> command_line::command::CommandResult {
@@ -12,14 +14,25 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
         }
         "off" => {
             log::info!("Init off USB");
-            command_line::command::run(&format!("udisksctl unmount -b {}", devices.partition))?;
-            devices.print_system_current_status()?;
+            unmount(&devices)?;
             command_line::command::run(&format!("udisksctl power-off -b {}", devices.raw))?;
             devices.print_system_current_status()?;
         }
         _ => {
             return Err("invalid command".to_string());
         }
+    }
+    Ok("Ok".to_string())
+}
+
+fn unmount(devices: &Devices) -> command_line::command::CommandResult {
+    let device_path = &devices.partition;
+    log::debug!("Init unmount {}", device_path);
+    if Path::new(device_path).exists() {
+        command_line::command::run(&format!("udisksctl unmount -b {}", device_path))?;
+        devices.print_system_current_status()?;
+    } else {
+        log::debug!("No mounted device to manage");
     }
     Ok("Ok".to_string())
 }
