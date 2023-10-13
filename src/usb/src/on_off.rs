@@ -113,14 +113,17 @@ impl DevicesAndPaths {
             command_line::command::run(&format!("ls /dev/* | grep {}", &self.devices.raw))?;
         let mount_status =
             command_line::command::run(&format!("mount | grep {}", &self.devices.raw))?;
-        println!("System current status");
-        println!("---------------------");
-        println!("Devices status");
-        println!("~~~~~~~~~~~~~~");
-        println!("{}", devices_status);
-        println!("Mount status");
-        println!("~~~~~~~~~~~~~~");
-        println!("{}", mount_status);
+        let system_status = format!(
+            "System current status
+---------------------
+Devices status
+~~~~~~~~~~~~~~
+{devices_status} 
+Mount status
+~~~~~~~~~~~~~~
+{mount_status}"
+        );
+        println!("{}", system_status);
         Ok("Ok".to_string())
     }
 }
