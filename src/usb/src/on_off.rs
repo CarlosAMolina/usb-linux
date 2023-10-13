@@ -94,14 +94,21 @@ impl DevicesAndPaths {
 
     // https://serverfault.com/questions/338937/differences-between-dev-sda-and-dev-sda1
     fn print_summary(&self) {
-        println!("Summary");
-        println!("=======");
-        println!();
-        println!("- Raw device: {}", self.devices.raw);
-        println!("- Raw device path: {}", self.paths.raw_device);
-        println!("- Partition device: {}", self.devices.partition);
-        println!("- Partition device path: {}", self.paths.partition_device);
-        println!();
+        let summary = format!(
+            "Summary
+=======
+
+- Raw device: {}
+- Raw device path: {}
+- Partition device: {}
+- Partition device path: {}
+",
+            self.devices.raw,
+            self.paths.raw_device,
+            self.devices.partition,
+            self.paths.partition_device
+        );
+        println!("{}", summary);
     }
 
     fn print_system_current_status(&self) -> command_line::command::CommandResult {
