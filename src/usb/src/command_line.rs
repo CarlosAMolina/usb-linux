@@ -2,13 +2,6 @@ use regex::Regex;
 
 pub mod command;
 
-pub fn clear() -> command::CommandResult {
-    if let Err(e) = command::run("clear") {
-        return Err(e);
-    }
-    Ok("Ok".to_string())
-}
-
 pub fn mount_device(device: &str) -> command::CommandResult {
     let command_result = command::run(&format!("udisksctl mount -b {}", device))?;
     let mounted_path = get_mounted_path(command_result);
@@ -25,11 +18,6 @@ fn get_mounted_path(text: String) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn command_line_clear_runs_ok() {
-        clear().unwrap();
-    }
 
     //#[test]
     fn mount_device_runs_ok() {

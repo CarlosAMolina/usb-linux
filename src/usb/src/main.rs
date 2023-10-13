@@ -30,10 +30,6 @@ fn main() {
             };
         }
     } else if args.len() == 3 {
-        if let Err(e) = usb::command_line::clear() {
-            log::error!("Problem clear terminal: {}", e);
-            process::exit(process_status_code::ERROR_EXIT_CODE);
-        }
         log::info!("Init on/off the usb");
         let config = OnOffConfig::new(&args).unwrap_or_else(|e| {
             log::error!("Problem parsing arguments: {}", e);
