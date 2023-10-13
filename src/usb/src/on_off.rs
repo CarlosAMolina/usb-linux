@@ -109,15 +109,16 @@ impl DevicesAndPaths {
     }
 
     fn print_system_current_status(&self) -> command_line::command::CommandResult {
+        let devices_status = command_line::command::run(&format!("ls /dev/* | grep {}", &self.devices.raw))?;
+        let mount_status = command_line::command::run(&format!("mount | grep {}", &self.devices.raw))?;
         println!("System current status");
         println!("---------------------");
-        println!();
         println!("Devices status");
         println!("~~~~~~~~~~~~~~");
-        command_line::command::run(&format!("ls /dev/* | grep {}", &self.devices.raw))?;
+        println!("{}", devices_status);
         println!("Mount status");
         println!("~~~~~~~~~~~~~~");
-        command_line::command::run(&format!("mount | grep {}", &self.devices.raw))?;
+        println!("{}", mount_status);
         Ok("Ok".to_string())
     }
 }

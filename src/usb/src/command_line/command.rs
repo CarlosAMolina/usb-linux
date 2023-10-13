@@ -13,7 +13,6 @@ pub fn run(c: &str) -> CommandResult {
         return Err(String::from_utf8_lossy(&output.stderr).to_string());
     }
     let output_str = String::from_utf8_lossy(&output.stdout);
-    println!("{}", output_str);
     Ok(output_str.to_string())
 }
 
