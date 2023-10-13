@@ -14,7 +14,6 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
             log::info!("Init end USB");
             command_line::command::run(&format!("udisksctl unmount -b {}", devices.partition))?;
             devices.print_system_current_status()?;
-            println!();
             command_line::command::run(&format!("udisksctl power-off -b {}", devices.raw))?;
             devices.print_system_current_status()?;
         }

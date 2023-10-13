@@ -5,7 +5,7 @@ pub mod command;
 pub fn mount_device(device: &str) -> command::CommandResult {
     let command_result = command::run(&format!("udisksctl mount -b {}", device))?;
     let mounted_path = get_mounted_path(command_result);
-    println!("Mounted at: {}", mounted_path);
+    log::debug!("Mounted at: {}", mounted_path);
     Ok(mounted_path)
 }
 
