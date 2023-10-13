@@ -15,8 +15,7 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
         "off" => {
             log::info!("Init off USB");
             unmount(&devices)?;
-            command_line::command::run(&format!("udisksctl power-off -b {}", devices.raw))?;
-            devices.print_system_current_status()?;
+            power_off(&devices)?;
         }
         _ => {
             return Err("invalid command".to_string());
@@ -33,6 +32,18 @@ fn unmount(devices: &Devices) -> command_line::command::CommandResult {
         devices.print_system_current_status()?;
     } else {
         log::debug!("No mounted device to manage");
+    }
+    Ok("Ok".to_string())
+}
+
+fn power_off(devices: &Devices) -> command_line::command::CommandResult {
+    let device_path = &devices.raw;
+    log::debug!("Init power off {}", device_path);
+    if Path::new(device_path).exists() {
+        command_line::command::run(&format!("udisksctl power-off -b {}", device_path))?;
+        devices.print_system_current_status()?;
+    } else {
+        log::debug!("No connected device to manage");
     }
     Ok("Ok".to_string())
 }
@@ -82,6 +93,7 @@ impl Devices {
     }
 
     fn print_system_current_status(&self) -> command_line::command::CommandResult {
+        log::debug!("Init print system current status");
         let system_status = self.get_system_current_status()?;
         log::debug!("{}", system_status);
         Ok("Ok".to_string())
