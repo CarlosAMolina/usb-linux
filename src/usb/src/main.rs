@@ -20,39 +20,39 @@ fn main() {
         } else {
             println!("Init monitor");
             let config = MonitorConfig::new(&args).unwrap_or_else(|e| {
-                eprintln!("Problem parsing arguments: {}", e);
+                log::error!("Problem parsing arguments: {}", e);
                 help();
                 process::exit(process_status_code::ERROR_EXIT_CODE);
             });
             if let Err(e) = usb::monitor::run(config) {
-                eprintln!("Application error: {}", e);
+                log::error!("Application error: {}", e);
                 process::exit(process_status_code::ERROR_EXIT_CODE);
             };
         }
     } else if args.len() == 3 {
         if let Err(e) = usb::command_line::clear() {
-            eprintln!("Problem clear terminal: {}", e);
+            log::error!("Problem clear terminal: {}", e);
             process::exit(process_status_code::ERROR_EXIT_CODE);
         }
-        println!("Init on-off");
+        log::info!("Init on/off the usb");
         let config = OnOffConfig::new(&args).unwrap_or_else(|e| {
-            eprintln!("Problem parsing arguments: {}", e);
+            log::error!("Problem parsing arguments: {}", e);
             help();
             process::exit(process_status_code::ERROR_EXIT_CODE);
         });
         if let Err(e) = usb::on_off::run(config) {
-            eprintln!("Application error: {}", e);
+            log::error!("Application error: {}", e);
             process::exit(process_status_code::ERROR_EXIT_CODE);
         };
     } else {
-        eprintln!("Problem parsing arguments");
+        log::error!("Problem parsing arguments");
         help();
         process::exit(process_status_code::ERROR_EXIT_CODE);
     }
 }
 
 fn help() {
-    eprintln!(
+    println!(
         "Usage
     Option help
         cargo run -- {{-h|help}}
