@@ -118,11 +118,12 @@ impl DevicesAndPaths {
         let result = format!(
             "System current status
 ---------------------
-Devices status
-~~~~~~~~~~~~~~
+
+Connected devices
+~~~~~~~~~~~~~~~~~
 {devices_status} 
-Mount status
-~~~~~~~~~~~~~~
+Mounted devices
+~~~~~~~~~~~~~~~~~
 {mount_status}"
         );
         Ok(result.to_string())
