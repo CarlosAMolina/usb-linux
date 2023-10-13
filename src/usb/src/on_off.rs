@@ -6,16 +6,12 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
     devices_and_paths.print_system_current_status()?;
     match &config.start_or_end[..] {
         "on" => {
-            println!("Init start USB");
-            println!("==============");
-            println!();
+            log::info!("Init start USB");
             command_line::mount_device(&devices_and_paths.paths.partition_device)?;
             devices_and_paths.print_system_current_status()?;
         }
         "off" => {
-            println!("Init end USB");
-            println!("============");
-            println!();
+            log::info!("Init end USB");
             command_line::command::run(&format!(
                 "udisksctl unmount -b {}",
                 devices_and_paths.paths.partition_device
@@ -109,11 +105,17 @@ impl DevicesAndPaths {
     }
 
     fn print_system_current_status(&self) -> command_line::command::CommandResult {
+        let system_status = self.get_system_current_status()?;
+        println!("{}", system_status);
+        Ok("Ok".to_string())
+    }
+
+    fn get_system_current_status(&self) -> command_line::command::CommandResult {
         let devices_status =
             command_line::command::run(&format!("ls /dev/* | grep {}", &self.devices.raw))?;
         let mount_status =
             command_line::command::run(&format!("mount | grep {}", &self.devices.raw))?;
-        let system_status = format!(
+        let result = format!(
             "System current status
 ---------------------
 Devices status
@@ -123,7 +125,6 @@ Mount status
 ~~~~~~~~~~~~~~
 {mount_status}"
         );
-        println!("{}", system_status);
-        Ok("Ok".to_string())
+        Ok(result.to_string())
     }
 }
