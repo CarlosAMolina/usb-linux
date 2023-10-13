@@ -18,7 +18,7 @@ fn main() {
             help();
             process::exit(process_status_code::OK_EXIT_CODE);
         } else {
-            println!("Init monitor");
+            log::info!("Init monitor");
             let config = MonitorConfig::new(&args).unwrap_or_else(|e| {
                 log::error!("Problem parsing arguments: {}", e);
                 help();
