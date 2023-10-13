@@ -2,10 +2,9 @@ use env_logger::{Builder, Env, Target};
 use std::env;
 use std::process;
 
-use usb::process_status_code;
 use usb::monitor::Config as MonitorConfig;
 use usb::on_off::Config as OnOffConfig;
-
+use usb::process_status_code;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
