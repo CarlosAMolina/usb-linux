@@ -1,28 +1,22 @@
 use crate::command_line;
 
 pub fn run(config: Config) -> command_line::command::CommandResult {
-    let devices_and_paths = DevicesAndPaths::new(&config);
-    devices_and_paths.print_summary();
-    devices_and_paths.print_system_current_status()?;
+    let devices = Devices::new(&config);
+    devices.print_summary();
+    devices.print_system_current_status()?;
     match &config.start_or_end[..] {
         "on" => {
             log::info!("Init start USB");
-            command_line::mount_device(&devices_and_paths.paths.partition_device)?;
-            devices_and_paths.print_system_current_status()?;
+            command_line::mount_device(&devices.partition)?;
+            devices.print_system_current_status()?;
         }
         "off" => {
             log::info!("Init end USB");
-            command_line::command::run(&format!(
-                "udisksctl unmount -b {}",
-                devices_and_paths.paths.partition_device
-            ))?;
-            devices_and_paths.print_system_current_status()?;
+            command_line::command::run(&format!("udisksctl unmount -b {}", devices.partition))?;
+            devices.print_system_current_status()?;
             println!();
-            command_line::command::run(&format!(
-                "udisksctl power-off -b {}",
-                devices_and_paths.paths.raw_device
-            ))?;
-            devices_and_paths.print_system_current_status()?;
+            command_line::command::run(&format!("udisksctl power-off -b {}", devices.raw))?;
+            devices.print_system_current_status()?;
         }
         _ => {
             return Err("invalid command".to_string());
@@ -63,74 +57,33 @@ impl Devices {
             raw: String::from(&config.partition_device[..config.partition_device.len() - 1]),
         }
     }
-}
-
-struct Paths {
-    raw_device: String,
-    partition_device: String,
-}
-
-impl Paths {
-    pub fn new(config: &Config, devices: &Devices) -> Paths {
-        Paths {
-            raw_device: devices.raw.to_string(),
-            partition_device: config.partition_device.to_string(),
-        }
-    }
-}
-
-struct DevicesAndPaths {
-    devices: Devices,
-    paths: Paths,
-}
-
-impl DevicesAndPaths {
-    fn new(config: &Config) -> DevicesAndPaths {
-        DevicesAndPaths {
-            devices: Devices::new(&config),
-            paths: Paths::new(&config, &Devices::new(&config)),
-        }
-    }
 
     // https://serverfault.com/questions/338937/differences-between-dev-sda-and-dev-sda1
     fn print_summary(&self) {
         let summary = format!(
-            "Summary
-=======
-
-- Raw device: {}
-- Raw device path: {}
-- Partition device: {}
-- Partition device path: {}
-",
-            self.devices.raw,
-            self.paths.raw_device,
-            self.devices.partition,
-            self.paths.partition_device
+            "Device to manage:
+- Device's raw path: {}
+- Device's partition path: {}",
+            self.raw, self.partition
         );
-        println!("{}", summary);
+        log::debug!("{}", summary);
     }
 
     fn print_system_current_status(&self) -> command_line::command::CommandResult {
         let system_status = self.get_system_current_status()?;
-        println!("{}", system_status);
+        log::debug!("{}", system_status);
         Ok("Ok".to_string())
     }
 
     fn get_system_current_status(&self) -> command_line::command::CommandResult {
         let devices_status =
-            command_line::command::run(&format!("ls /dev/* | grep {}", &self.devices.raw))?;
-        let mount_status =
-            command_line::command::run(&format!("mount | grep {}", &self.devices.raw))?;
+            command_line::command::run(&format!("ls /dev/* | grep {}", &self.raw))?;
+        let mount_status = command_line::command::run(&format!("mount | grep {}", &self.raw))?;
         let result = format!(
-            "System current status
----------------------
-
-Connected devices
-~~~~~~~~~~~~~~~~~
+            "System current status:
+- Connected devices:
 {devices_status} 
-Mounted devices
-~~~~~~~~~~~~~~~~~
+- Mounted devices:
 {mount_status}"
         );
         Ok(result.to_string())
