@@ -4,8 +4,8 @@ use crate::command_line;
 
 pub fn run(config: Config) -> command_line::command::CommandResult {
     let devices = Devices::new(&config);
-    devices.print_summary();
-    devices.print_system_current_status()?;
+    devices.show_summary();
+    devices.show_system_current_status()?;
     match &config.start_or_end[..] {
         "on" => {
             log::info!("Init on USB");
@@ -39,7 +39,7 @@ fn unmount(devices: &Devices) -> command_line::command::CommandResult {
     log::debug!("Init unmount {}", device_path);
     if Path::new(device_path).exists() {
         command_line::command::run(&format!("udisksctl unmount -b {}", device_path))?;
-        devices.print_system_current_status()?;
+        devices.show_system_current_status()?;
     } else {
         log::debug!("No mounted device to manage");
     }
@@ -51,7 +51,7 @@ fn power_off(devices: &Devices) -> command_line::command::CommandResult {
     log::debug!("Init power off {}", device_path);
     if Path::new(device_path).exists() {
         command_line::command::run(&format!("udisksctl power-off -b {}", device_path))?;
-        devices.print_system_current_status()?;
+        devices.show_system_current_status()?;
     } else {
         log::debug!("No connected device to manage");
     }
@@ -92,7 +92,7 @@ impl Devices {
     }
 
     // https://serverfault.com/questions/338937/differences-between-dev-sda-and-dev-sda1
-    fn print_summary(&self) {
+    fn show_summary(&self) {
         let summary = format!(
             "Device to manage:
 - Device's raw path: {}
@@ -102,8 +102,8 @@ impl Devices {
         log::debug!("{}", summary);
     }
 
-    fn print_system_current_status(&self) -> command_line::command::CommandResult {
-        log::debug!("Init print system current status");
+    fn show_system_current_status(&self) -> command_line::command::CommandResult {
+        log::debug!("Init show system current status");
         let system_status = self.get_system_current_status()?;
         log::debug!("{}", system_status);
         Ok("Ok".to_string())
