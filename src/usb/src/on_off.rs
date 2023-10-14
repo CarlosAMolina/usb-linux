@@ -26,10 +26,17 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
 fn mount(devices: &Devices) -> command_line::command::CommandResult {
     let device_path = &devices.partition;
     log::debug!("Init mount {}", device_path);
-    if Path::new(device_path).exists() {
-        command_line::mount_device(&devices.partition)?;
+    // TODO duplicated line, extract to common method
+    let mount_status = command_line::command::run(&format!("mount | grep {}", devices.raw))?;
+    if mount_status.is_empty() {
+        if Path::new(device_path).exists() {
+            command_line::mount_device(&devices.partition)?;
+        } else {
+            log::debug!("No device to manage");
+        }
     } else {
-        log::debug!("No device to manage");
+        log::debug!("Device already mounted");
+        // TODO notify device and mounted path
     }
     Ok("Ok".to_string())
 }
