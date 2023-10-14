@@ -9,8 +9,7 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
     match &config.start_or_end[..] {
         "on" => {
             log::info!("Init on USB");
-            command_line::mount_device(&devices.partition)?;
-            devices.print_system_current_status()?;
+            mount(&devices)?;
         }
         "off" => {
             log::info!("Init off USB");
@@ -20,6 +19,17 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
         _ => {
             return Err("invalid command".to_string());
         }
+    }
+    Ok("Ok".to_string())
+}
+
+fn mount(devices: &Devices) -> command_line::command::CommandResult {
+    let device_path = &devices.partition;
+    log::debug!("Init mount {}", device_path);
+    if Path::new(device_path).exists() {
+        command_line::mount_device(&devices.partition)?;
+    } else {
+        log::debug!("No device to manage");
     }
     Ok("Ok".to_string())
 }
