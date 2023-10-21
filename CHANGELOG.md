@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Help option.
 
 ### Changed
-- Improve connect/disconnect steps done.
+- Improve connect/disconnect steps.
  
 ## [0.3.0] - 2022-04-09
 ### Added
