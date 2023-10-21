@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Added
 - Help option.
+
+### Changed
+- Improve connect/disconnect steps done.
  
 ## [0.3.0] - 2022-04-09
 ### Added
