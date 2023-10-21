@@ -18,7 +18,10 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
                 unmount(&devices)?;
                 devices.show_system_current_status()?;
             } else {
-                log::debug!("The provided device is not a partition: {}. Omitting unmount", devices.partition);
+                log::debug!(
+                    "The provided device is not a partition: {}. Omitting unmount",
+                    devices.partition
+                );
             }
             if is_device_raw(&devices.raw) {
                 power_off(&devices)?;
