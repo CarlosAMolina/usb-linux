@@ -16,26 +16,29 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
             log::info!("Init off USB");
             if is_partition(&devices.partition) {
                 unmount(&devices)?;
+                devices.show_system_current_status()?;
             } else {
-                log::debug!("No partition provided. Omitting unmount");
+                log::debug!("The provided device is not a partition: {}. Omitting unmount", devices.partition);
             }
             if is_device_raw(&devices.raw) {
                 power_off(&devices)?;
             } else {
-                log::warn!("Invalid raw device. Omitting power off");
+                log::warn!("Invalid raw device: {}. Omitting power off", devices.raw);
+                return Err("invalid device".to_string());
             }
         }
         _ => {
             return Err("invalid command".to_string());
         }
     }
+    devices.show_system_current_status()?;
     Ok("Ok".to_string())
 }
 
 fn mount(devices: &Devices) -> command_line::command::CommandResult {
     if !is_partition(&devices.partition) {
-        log::error!(
-            "The provided device must end in a number: {}",
+        log::warn!(
+            "The provided device must end in a number: {}. Omitting mount",
             devices.partition
         );
         return Err("invalid partition device".to_string());
@@ -81,7 +84,6 @@ fn unmount(devices: &Devices) -> command_line::command::CommandResult {
     log::debug!("Init unmount {}", device_path);
     if Path::new(device_path).exists() {
         command_line::command::run(&format!("udisksctl unmount -b {}", device_path))?;
-        devices.show_system_current_status()?;
     } else {
         log::debug!("No mounted device to manage");
     }
@@ -93,7 +95,6 @@ fn power_off(devices: &Devices) -> command_line::command::CommandResult {
     log::debug!("Init power off {}", device_path);
     if Path::new(device_path).exists() {
         command_line::command::run(&format!("udisksctl power-off -b {}", device_path))?;
-        devices.show_system_current_status()?;
     } else {
         log::debug!("No connected device to manage");
     }
