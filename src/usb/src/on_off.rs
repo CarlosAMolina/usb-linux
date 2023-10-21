@@ -5,7 +5,7 @@ use crate::command_line;
 pub fn run(config: Config) -> command_line::command::CommandResult {
     let devices = Devices::new(&config);
     log::debug!("User input device: {}", config.partition_device);
-    devices.show_summary();
+    devices.show_device_summary();
     devices.show_system_current_status()?;
     match &config.start_or_end[..] {
         "on" => {
@@ -135,7 +135,7 @@ impl Devices {
     }
 
     // https://serverfault.com/questions/338937/differences-between-dev-sda-and-dev-sda1
-    fn show_summary(&self) {
+    fn show_device_summary(&self) {
         let summary = format!(
             "Device to manage:
 - Device's raw path: {}
