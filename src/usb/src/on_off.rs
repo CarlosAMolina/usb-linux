@@ -4,6 +4,7 @@ use crate::command_line;
 
 pub fn run(config: Config) -> command_line::command::CommandResult {
     let devices = Devices::new(&config);
+    log::debug!("User input device: {}", config.partition_device);
     devices.show_summary();
     devices.show_system_current_status()?;
     match &config.start_or_end[..] {
@@ -24,10 +25,12 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
 }
 
 fn mount(devices: &Devices) -> command_line::command::CommandResult {
+    if !is_partition_valid(&devices.partition) {
+        return Err("invalid partition device".to_string());
+    }
     let device_path = &devices.partition;
     log::debug!("Init mount {}", device_path);
-    // TODO duplicated line, extract to common method
-    let mount_status = command_line::command::run(&format!("mount | grep {}", devices.raw))?;
+    let mount_status = get_mount_status(devices)?;
     if mount_status.is_empty() {
         if Path::new(device_path).exists() {
             command_line::mount_device(&devices.partition)?;
@@ -39,6 +42,19 @@ fn mount(devices: &Devices) -> command_line::command::CommandResult {
         // TODO notify device and mounted path
     }
     Ok("Ok".to_string())
+}
+
+fn is_partition_valid(partition: &String) -> bool {
+    let partition_last_character = partition.chars().last().unwrap();
+    let is_valid = partition_last_character.is_digit(10);
+    if !is_valid {
+        log::error!("The provided device must end in a number: {}", partition);
+    }
+    is_valid
+}
+
+fn get_mount_status(devices: &Devices) -> command_line::command::CommandResult {
+    command_line::command::run(&format!("mount | grep {}", devices.raw))
 }
 
 fn unmount(devices: &Devices) -> command_line::command::CommandResult {
@@ -119,7 +135,7 @@ impl Devices {
     fn get_system_current_status(&self) -> command_line::command::CommandResult {
         let devices_status =
             command_line::command::run(&format!("ls /dev/* | grep {}", &self.raw))?;
-        let mount_status = command_line::command::run(&format!("mount | grep {}", &self.raw))?;
+        let mount_status = get_mount_status(&self)?;
         let result = format!(
             "System current status:
 - Connected devices:
