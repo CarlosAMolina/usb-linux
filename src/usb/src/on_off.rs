@@ -14,8 +14,16 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
         }
         "off" => {
             log::info!("Init off USB");
-            unmount(&devices)?;
-            power_off(&devices)?;
+            if is_partition(&devices.partition) {
+                unmount(&devices)?;
+            } else {
+                log::debug!("No partition provided. Omitting unmount");
+            }
+            if is_device_raw(&devices.raw) {
+                power_off(&devices)?;
+            } else {
+                log::warn!("Invalid raw device. Omitting power off");
+            }
         }
         _ => {
             return Err("invalid command".to_string());
@@ -25,7 +33,11 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
 }
 
 fn mount(devices: &Devices) -> command_line::command::CommandResult {
-    if !is_partition_valid(&devices.partition) {
+    if !is_partition(&devices.partition) {
+        log::error!(
+            "The provided device must end in a number: {}",
+            devices.partition
+        );
         return Err("invalid partition device".to_string());
     }
     let device_path = &devices.partition;
@@ -44,13 +56,20 @@ fn mount(devices: &Devices) -> command_line::command::CommandResult {
     Ok("Ok".to_string())
 }
 
-fn is_partition_valid(partition: &String) -> bool {
-    let partition_last_character = partition.chars().last().unwrap();
-    let is_valid = partition_last_character.is_digit(10);
-    if !is_valid {
-        log::error!("The provided device must end in a number: {}", partition);
+fn is_partition(string: &String) -> bool {
+    let partition_last_character = string.chars().last().unwrap();
+    partition_last_character.is_digit(10)
+}
+
+fn is_device_raw(string: &String) -> bool {
+    if is_partition(string) {
+        return true;
+    } else {
+        let path = Path::new(string);
+        let raw_name = path.file_name().unwrap();
+        let result = raw_name.len() == 3;
+        result
     }
-    is_valid
 }
 
 fn get_mount_status(devices: &Devices) -> command_line::command::CommandResult {
