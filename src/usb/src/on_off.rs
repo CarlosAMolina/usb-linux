@@ -26,7 +26,7 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
             if is_device_raw(&devices.raw) {
                 power_off(&devices)?;
             } else {
-                log::warn!("Invalid raw device: {}. Omitting power off", devices.raw);
+                log::debug!("Invalid raw device: {}. Omitting power off", devices.raw);
                 return Err("invalid device".to_string());
             }
         }
