@@ -11,6 +11,8 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
         "on" => {
             log::info!("Init on USB");
             mount(&devices)?;
+            devices.show_system_current_status()?;
+            log::debug!("Completed on USB");
         }
         "off" => {
             log::info!("Init off USB");
@@ -29,12 +31,13 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
                 log::debug!("Invalid raw device: {}. Omitting power off", devices.raw);
                 return Err("invalid device".to_string());
             }
+            devices.show_system_current_status()?;
+            log::debug!("Completed off USB");
         }
         _ => {
             return Err("invalid command".to_string());
         }
     }
-    devices.show_system_current_status()?;
     Ok("Ok".to_string())
 }
 
