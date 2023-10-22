@@ -1,5 +1,6 @@
 use std::error::Error;
 use std::fs::OpenOptions;
+use std::io::Seek;
 
 use serde::{Deserialize, Serialize};
 
@@ -31,14 +32,18 @@ pub fn delete_mount_info_in_file(device_partition: &String) {
 }
 
 fn append_to_file(file_path: &str, record: Vec<&String>) -> Result<(), Box<dyn Error>> {
-    let file = OpenOptions::new()
+    let mut file = OpenOptions::new()
         .create(true)
         .append(true)
         .write(true)
         .open(file_path)
         .unwrap();
-    let mut wtr = csv::Writer::from_writer(file);
-    wtr.write_record(&record)?;
+    // https://stackoverflow.com/questions/76688593/header-appending-for-every-record-rust-csv-writer
+    let needs_headers = file.seek(std::io::SeekFrom::End(0))? == 0;
+    let mut wtr = csv::WriterBuilder::new()
+        .has_headers(needs_headers)
+        .from_writer(file);
+    wtr.serialize(&MountInfo::new(&record[0], &record[1]))?;
     wtr.flush()?;
     Ok(())
 }

@@ -3,8 +3,9 @@ use regex::Regex;
 pub mod command;
 
 pub fn mount_device(device: &str) -> command::CommandResult {
-    let command_result = command::run(&format!("udisksctl mount -b {}", device))?;
-    let mounted_path = get_mounted_path(command_result);
+    let mounted_path = "/foo/test".to_string(); // TODO
+    // TODO let command_result = command::run(&format!("udisksctl mount -b {}", device))?;
+    // TODO let mounted_path = get_mounted_path(command_result);
     log::debug!("Mounted at: {}", mounted_path);
     Ok(mounted_path)
 }
