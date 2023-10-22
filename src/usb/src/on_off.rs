@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use crate::command_line;
+use crate::file;
 
 pub fn run(config: Config) -> command_line::command::CommandResult {
     let devices = Devices::new(&config);
@@ -53,8 +54,9 @@ fn mount(devices: &Devices) -> command_line::command::CommandResult {
     log::debug!("Init mount {}", device_path);
     let mount_status = get_mount_status(devices)?;
     if mount_status.is_empty() {
-        if Path::new(device_path).exists() {
-            command_line::mount_device(&devices.partition)?;
+        if Path::new(&device_path).exists() {
+            let mounted_path = command_line::mount_device(&devices.partition)?;
+            save_mount_info_to_file(&device_path, &mounted_path)
         } else {
             log::debug!("No device to manage");
         }
@@ -63,6 +65,13 @@ fn mount(devices: &Devices) -> command_line::command::CommandResult {
         // TODO notify device and mounted path
     }
     Ok("Ok".to_string())
+}
+
+fn save_mount_info_to_file(device_path: &String, mounted_path: &String) {
+    let csv_file_path_name = "/tmp/usb.csv".to_string();
+    log::debug!("Init write to {}", csv_file_path_name);
+    let record = vec![device_path, mounted_path];
+    file::write_to_file(&csv_file_path_name, record).unwrap();
 }
 
 fn is_partition(string: &String) -> bool {
