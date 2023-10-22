@@ -222,6 +222,7 @@ dependencies = [
  "env_logger",
  "log",
  "regex",
+ "serde",
 ]
 
 [[package]]

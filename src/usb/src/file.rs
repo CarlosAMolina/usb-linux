@@ -1,7 +1,7 @@
 use std::error::Error;
 use std::fs::OpenOptions;
 
-pub fn write_to_file(file_path: &String, record: Vec<&String>) -> Result<(), Box<dyn Error>> {
+pub fn append_to_file(file_path: &String, record: Vec<&String>) -> Result<(), Box<dyn Error>> {
     let file = OpenOptions::new()
         .create(true)
         .append(true)
@@ -13,3 +13,4 @@ pub fn write_to_file(file_path: &String, record: Vec<&String>) -> Result<(), Box
     wtr.flush()?;
     Ok(())
 }
+
