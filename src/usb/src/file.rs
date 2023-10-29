@@ -30,15 +30,15 @@ pub fn delete_mount_info_in_file(file_path: &str, device_partition: &String) {
             .filter(|mount_info| &mount_info.device_partition != device_partition)
             .collect();
         write_to_new_file(file_path, &new_file_content_vector).unwrap();
-        println!("{:?}", new_file_content_vector);
     } else {
         log::debug!("No file to modify. The file does not exist: {}", file_path);
     }
 }
 
 fn append_to_file(file_path: &str, record: Vec<&String>) -> Result<(), Box<dyn Error>> {
+    let must_create_new_file = !Path::new(file_path).exists();
     let mut file = OpenOptions::new()
-        .create(true)
+        .create(must_create_new_file)
         .append(true)
         .write(true)
         .open(file_path)
@@ -84,11 +84,13 @@ mod tests {
     #[test]
     fn all_file_methods_runs_ok() {
         let file_path = "/tmp/test-usb.csv";
+        if Path::new(file_path).exists() {
+            std::fs::remove_file(file_path).unwrap();
+        };
         let mut expected_file_content = "device_partition,mounted_path
 /dev/foo1,/mount/foo
 ".to_string();
-        let mount_info = vec!(MountInfo::new("/dev/foo1", "/mount/foo"));
-        write_to_new_file(file_path, &mount_info).unwrap();
+        save_mount_info_to_file(file_path, &"/dev/foo1".to_string(), &"/mount/foo".to_string());
         let contents = std::fs::read_to_string(file_path).unwrap();
         assert_eq!(expected_file_content,contents);
         expected_file_content.push_str("/dev/bar1,/mount/bar\n");
@@ -101,5 +103,8 @@ mod tests {
         delete_mount_info_in_file(file_path, &"/dev/foo1".to_string());
         let contents = std::fs::read_to_string(file_path).unwrap();
         assert_eq!(expected_file_content, contents);
+        delete_mount_info_in_file(file_path, &"/dev/bar1".to_string());
+        let contents = std::fs::read_to_string(file_path).unwrap();
+        assert_eq!(true, contents.is_empty());
     }
 }
