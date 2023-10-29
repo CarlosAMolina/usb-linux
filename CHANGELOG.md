@@ -6,8 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added
-- Help option.
 - Export mount info to file.
+- Help option.
+- Logs.
 
 ### Changed
 - Improve connect/disconnect steps.
