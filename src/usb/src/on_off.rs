@@ -58,7 +58,7 @@ fn mount(devices: &Devices) -> command_line::command::CommandResult {
         let device_partition = &devices.partition;
         if Path::new(device_partition).exists() {
             let mounted_path = command_line::mount_device(device_partition)?;
-            file::save_mount_info_to_file(device_partition, &mounted_path)
+            file::save_mount_info_to_file(file::CSV_FILE_PATH_NAME, device_partition, &mounted_path)
         } else {
             log::info!("The device does not exist: {}", device_partition);
         }

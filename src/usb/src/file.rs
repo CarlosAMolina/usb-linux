@@ -5,12 +5,12 @@ use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
-const CSV_FILE_PATH_NAME: &str = "/tmp/usb.csv";
+pub const CSV_FILE_PATH_NAME: &str = "/tmp/usb.csv";
 
-pub fn save_mount_info_to_file(device_partition: &String, mounted_path: &String) {
-    log::debug!("Init write mount info to {}", CSV_FILE_PATH_NAME);
+pub fn save_mount_info_to_file(file_path: &str, device_partition: &String, mounted_path: &String) {
+    log::debug!("Init write mount info to {}", file_path);
     let record = vec![device_partition, mounted_path];
-    append_to_file(CSV_FILE_PATH_NAME, record).unwrap();
+    append_to_file(file_path, record).unwrap();
 }
 
 
@@ -84,12 +84,16 @@ mod tests {
     #[test]
     fn all_file_methods_runs_ok() {
         let file_path = "/tmp/test-usb.csv";
-        let mount_info = vec!(MountInfo::new("/dev/foo3", "/mount/foo"));
+        let mount_info = vec!(MountInfo::new("/dev/foo1", "/mount/foo"));
         write_to_new_file(file_path, &mount_info).unwrap();
-        let expected_file_content = "device_partition,mounted_path
-/dev/foo3,/mount/foo
+        let mut expected_file_content = "device_partition,mounted_path
+/dev/foo1,/mount/foo
 ".to_string();
         let contents = std::fs::read_to_string(file_path).unwrap();
+        assert_eq!(expected_file_content,contents);
+        save_mount_info_to_file(file_path, &"/dev/bar1".to_string(), &"/mount/bar".to_string());
+        let contents = std::fs::read_to_string(file_path).unwrap();
+        expected_file_content.push_str("/dev/bar1,/mount/bar\n");
         assert_eq!(expected_file_content,contents);
     }
 }
