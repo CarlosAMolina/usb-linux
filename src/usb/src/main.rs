@@ -17,7 +17,7 @@ fn main() {
             help();
             process::exit(process_status_code::OK_EXIT_CODE);
         } else {
-            log::info!("Init monitor");
+            log::debug!("Init monitor");
             let config = MonitorConfig::new(&args).unwrap_or_else(|e| {
                 log::error!("Problem parsing arguments: {}", e);
                 help();
@@ -29,7 +29,7 @@ fn main() {
             };
         }
     } else if args.len() == 3 {
-        log::info!("Init on/off the usb");
+        log::debug!("Init on/off the usb");
         let config = OnOffConfig::new(&args).unwrap_or_else(|e| {
             log::error!("Problem parsing arguments: {}", e);
             help();

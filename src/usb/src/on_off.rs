@@ -10,13 +10,13 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
     devices.show_system_current_status()?;
     match &config.start_or_end[..] {
         "on" => {
-            log::info!("Init on USB");
+            log::debug!("Init on USB");
             mount(&devices)?;
             devices.show_system_current_status()?;
             log::debug!("Completed on USB");
         }
         "off" => {
-            log::info!("Init off USB");
+            log::debug!("Init off USB");
             file::delete_mount_info_in_file(&devices.partition);
             // TODO
             //if is_partition(&devices.partition) {
@@ -53,18 +53,19 @@ fn mount(devices: &Devices) -> command_line::command::CommandResult {
         );
         return Err("invalid partition device".to_string());
     }
-    let device_path = &devices.partition;
-    log::debug!("Init mount {}", device_path);
-    let mount_status = get_mount_status(devices)?;
+    log::debug!("Init mount {}", devices.partition);
+    let mount_status = get_mount_status(&devices.raw)?;
     if mount_status.is_empty() {
-        if Path::new(&device_path).exists() {
+        if Path::new(&devices.partition).exists() {
             let mounted_path = command_line::mount_device(&devices.partition)?;
-            file::save_mount_info_to_file(&device_path, &mounted_path)
+            file::save_mount_info_to_file(&devices.partition, &mounted_path)
         } else {
-            log::debug!("No device to manage");
+            log::info!("No device to manage");
         }
     } else {
-        log::debug!("Device already mounted");
+        log::info!("{}", "Device already mounted");
+        let partition_mount_status = get_mount_status(&devices.partition)?;
+        log::info!("{}", partition_mount_status);
         // TODO notify device and mounted path
     }
     Ok("Ok".to_string())
@@ -86,8 +87,8 @@ fn is_device_raw(string: &String) -> bool {
     }
 }
 
-fn get_mount_status(devices: &Devices) -> command_line::command::CommandResult {
-    command_line::command::run(&format!("mount | grep {}", devices.raw))
+fn get_mount_status(device: &String) -> command_line::command::CommandResult {
+    command_line::command::run(&format!("mount | grep {}", device))
 }
 
 fn unmount(devices: &Devices) -> command_line::command::CommandResult {
@@ -166,7 +167,7 @@ impl Devices {
     fn get_system_current_status(&self) -> command_line::command::CommandResult {
         let devices_status =
             command_line::command::run(&format!("ls /dev/* | grep {}", &self.raw))?;
-        let mount_status = get_mount_status(&self)?;
+        let mount_status = get_mount_status(&self.raw)?;
         let result = format!(
             "System current status:
 - Connected devices:

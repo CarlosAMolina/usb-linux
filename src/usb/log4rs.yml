@@ -1,4 +1,10 @@
 appenders:
+  stdout:
+    kind: console
+    filters:
+      - kind: threshold
+        level: info
+
   logfile:
     kind: file
     path: "/tmp/usb.log"
@@ -11,5 +17,6 @@ appenders:
 root:
   level: trace
   appenders:
+    - stdout
     - logfile
 
