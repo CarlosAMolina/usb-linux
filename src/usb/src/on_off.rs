@@ -20,7 +20,7 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
             if is_partition(&devices.partition) {
                 // TODO unmount(&devices)?;
                 devices.show_system_current_status()?;
-                file::delete_mount_info_in_file(&devices.partition);
+                file::delete_mount_info_in_file(file::CSV_FILE_PATH_NAME, &devices.partition);
             } else {
                 log::debug!(
                     "The provided device is not a partition: {}. Omitting unmount",
