@@ -17,26 +17,25 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
         }
         "off" => {
             log::debug!("Init off USB");
-            file::delete_mount_info_in_file(&devices.partition);
+            if is_partition(&devices.partition) {
+                // TODO unmount(&devices)?;
+                devices.show_system_current_status()?;
+                file::delete_mount_info_in_file(&devices.partition);
+            } else {
+                log::debug!(
+                    "The provided device is not a partition: {}. Omitting unmount",
+                    devices.partition
+                );
+            }
             // TODO
-            //if is_partition(&devices.partition) {
-            //    unmount(&devices)?;
-            //    devices.show_system_current_status()?;
-            //    delete_mount_info_in_file(&devices.partition);
-            //} else {
-            //    log::debug!(
-            //        "The provided device is not a partition: {}. Omitting unmount",
-            //        devices.partition
-            //    );
-            //}
             //if is_device_raw(&devices.raw) {
             //    power_off(&devices)?;
             //} else {
             //    log::debug!("Invalid raw device: {}. Omitting power off", devices.raw);
             //    return Err("invalid device".to_string());
             //}
-            //devices.show_system_current_status()?;
-            //log::debug!("Completed off USB");
+            devices.show_system_current_status()?;
+            log::debug!("Completed off USB");
         }
         _ => {
             return Err("invalid command".to_string());

@@ -1,6 +1,7 @@
 use std::error::Error;
 use std::fs::OpenOptions;
 use std::io::Seek;
+use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
@@ -16,19 +17,23 @@ pub fn save_mount_info_to_file(device_partition: &String, mounted_path: &String)
 // TODO save headers in save_mount_info_to_file
 pub fn delete_mount_info_in_file(device_partition: &String) {
     log::debug!("Init delete mount info of {}", device_partition);
-    let mut rdr = csv::Reader::from_path(CSV_FILE_PATH_NAME).unwrap();
-    let mut file_content_vector: Vec<MountInfo> = Vec::new();
-    for result in rdr.records() {
-        let record = result.unwrap();
-        let mount_info = MountInfo::new(&record[0], &record[1]);
-        file_content_vector.push(mount_info);
+    if Path::new(CSV_FILE_PATH_NAME).exists() {
+        let mut rdr = csv::Reader::from_path(CSV_FILE_PATH_NAME).unwrap();
+        let mut file_content_vector: Vec<MountInfo> = Vec::new();
+        for result in rdr.records() {
+            let record = result.unwrap();
+            let mount_info = MountInfo::new(&record[0], &record[1]);
+            file_content_vector.push(mount_info);
+        }
+        let new_file_content_vector: Vec<MountInfo> = file_content_vector
+            .into_iter()
+            .filter(|mount_info| &mount_info.device_partition != device_partition)
+            .collect();
+        write_to_new_file(CSV_FILE_PATH_NAME, &new_file_content_vector).unwrap();
+        println!("{:?}", new_file_content_vector);
+    } else {
+        log::debug!("No file to modify. The file does not exist: {}", CSV_FILE_PATH_NAME);
     }
-    let new_file_content_vector: Vec<MountInfo> = file_content_vector
-        .into_iter()
-        .filter(|mount_info| &mount_info.device_partition != device_partition)
-        .collect();
-    write_to_new_file(CSV_FILE_PATH_NAME, &new_file_content_vector).unwrap();
-    println!("{:?}", new_file_content_vector);
 }
 
 fn append_to_file(file_path: &str, record: Vec<&String>) -> Result<(), Box<dyn Error>> {
