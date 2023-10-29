@@ -56,16 +56,18 @@ fn mount(devices: &Devices) -> command_line::command::CommandResult {
     log::debug!("Init mount {}", devices.partition);
     let mount_status = get_mount_status(&devices.raw)?;
     if mount_status.is_empty() {
-        if Path::new(&devices.partition).exists() {
-            let mounted_path = command_line::mount_device(&devices.partition)?;
-            file::save_mount_info_to_file(&devices.partition, &mounted_path)
+        let device_partition = &devices.partition;
+        if Path::new(device_partition).exists() {
+            let mounted_path = command_line::mount_device(device_partition)?;
+            file::save_mount_info_to_file(device_partition, &mounted_path)
         } else {
-            log::info!("No device to manage");
+            log::info!("The device does not exist: {}", device_partition);
         }
     } else {
         log::info!("{}", "Device already mounted");
         let partition_mount_status = get_mount_status(&devices.partition)?;
-        log::info!("{}", partition_mount_status);
+        let partition_mount_status_to_show = get_partition_mount_status_to_show(&partition_mount_status);
+        log::info!("{}", partition_mount_status_to_show);
         // TODO notify device and mounted path
     }
     Ok("Ok".to_string())
@@ -176,5 +178,25 @@ impl Devices {
 {mount_status}"
         );
         Ok(result.to_string())
+    }
+}
+
+fn get_partition_mount_status_to_show(partition_mount_status: &String) -> String {
+    let string_parts: Vec<&str> =  partition_mount_status.split_whitespace().collect();
+    let result = format!("{} mounted on {}", string_parts[0], string_parts[2]);
+    result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get_partition_mount_status_to_show_gives_expected_result() {
+        let partition_mount_status = "/dev/sda4 on / type ext4 (rw,relatime)".to_string();
+        assert_eq!(
+            "/dev/sda4 mounted on /",
+            get_partition_mount_status_to_show(&partition_mount_status)
+        );
     }
 }
