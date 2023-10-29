@@ -76,3 +76,20 @@ impl MountInfo {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn all_file_methods_runs_ok() {
+        let file_path = "/tmp/test-usb.csv";
+        let mount_info = vec!(MountInfo::new("/dev/foo3", "/mount/foo"));
+        write_to_new_file(file_path, &mount_info).unwrap();
+        let expected_file_content = "device_partition,mounted_path
+/dev/foo3,/mount/foo
+".to_string();
+        let contents = std::fs::read_to_string(file_path).unwrap();
+        assert_eq!(expected_file_content,contents);
+    }
+}
