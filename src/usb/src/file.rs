@@ -13,7 +13,6 @@ pub fn save_mount_info_to_file(file_path: &str, device_partition: &String, mount
     append_to_file(file_path, record).unwrap();
 }
 
-
 // TODO save headers in save_mount_info_to_file
 pub fn delete_mount_info_in_file(file_path: &str, device_partition: &String) {
     log::debug!("Init delete mount info of {}", device_partition);
@@ -89,17 +88,27 @@ mod tests {
         };
         let mut expected_file_content = "device_partition,mounted_path
 /dev/foo1,/mount/foo
-".to_string();
-        save_mount_info_to_file(file_path, &"/dev/foo1".to_string(), &"/mount/foo".to_string());
+"
+        .to_string();
+        save_mount_info_to_file(
+            file_path,
+            &"/dev/foo1".to_string(),
+            &"/mount/foo".to_string(),
+        );
         let contents = std::fs::read_to_string(file_path).unwrap();
-        assert_eq!(expected_file_content,contents);
+        assert_eq!(expected_file_content, contents);
         expected_file_content.push_str("/dev/bar1,/mount/bar\n");
-        save_mount_info_to_file(file_path, &"/dev/bar1".to_string(), &"/mount/bar".to_string());
+        save_mount_info_to_file(
+            file_path,
+            &"/dev/bar1".to_string(),
+            &"/mount/bar".to_string(),
+        );
         let contents = std::fs::read_to_string(file_path).unwrap();
-        assert_eq!(expected_file_content,contents);
+        assert_eq!(expected_file_content, contents);
         let expected_file_content = "device_partition,mounted_path
 /dev/bar1,/mount/bar
-".to_string();
+"
+        .to_string();
         delete_mount_info_in_file(file_path, &"/dev/foo1".to_string());
         let contents = std::fs::read_to_string(file_path).unwrap();
         assert_eq!(expected_file_content, contents);

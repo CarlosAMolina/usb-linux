@@ -65,7 +65,8 @@ fn mount(devices: &Devices) -> command_line::command::CommandResult {
     } else {
         log::info!("{}", "Device already mounted");
         let partition_mount_status = get_mount_status(&devices.partition)?;
-        let partition_mount_status_to_show = get_partition_mount_status_to_show(&partition_mount_status);
+        let partition_mount_status_to_show =
+            get_partition_mount_status_to_show(&partition_mount_status);
         log::info!("{}", partition_mount_status_to_show);
         // TODO notify device and mounted path
     }
@@ -181,7 +182,7 @@ impl Devices {
 }
 
 fn get_partition_mount_status_to_show(partition_mount_status: &String) -> String {
-    let string_parts: Vec<&str> =  partition_mount_status.split_whitespace().collect();
+    let string_parts: Vec<&str> = partition_mount_status.split_whitespace().collect();
     let result = format!("{} mounted on {}", string_parts[0], string_parts[2]);
     result
 }
