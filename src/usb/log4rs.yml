@@ -1,0 +1,15 @@
+appenders:
+  logfile:
+    kind: file
+    path: "/tmp/usb.log"
+    encoder:
+      pattern: "{d} {l} {t} - {m}{n}"
+    filters:
+      - kind: threshold
+        level: trace
+
+root:
+  level: trace
+  appenders:
+    - logfile
+

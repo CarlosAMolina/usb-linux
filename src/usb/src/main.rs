@@ -1,4 +1,5 @@
-use env_logger::{Builder, Env, Target};
+use log;
+use log4rs;
 use std::env;
 use std::process;
 
@@ -9,9 +10,7 @@ use usb::process_status_code;
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    Builder::from_env(Env::default().default_filter_or("debug"))
-        .target(Target::Stdout)
-        .init();
+    let _handle = log4rs::init_file("log4rs.yml", Default::default()).unwrap();
 
     if args.len() == 2 {
         if args[1] == "-h" || args[1] == "help" {
