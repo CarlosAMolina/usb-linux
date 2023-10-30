@@ -19,15 +19,15 @@ fn main() {
             help();
             process::exit(process_status_code::OK_EXIT_CODE);
         } else if args[1] == "-d" || args[1] == "devices" {
-            log::debug!("Init show devices");
+            log::info!("Init show devices");
             system::show_devices();
             process::exit(process_status_code::OK_EXIT_CODE);
         } else if args[1] == "-s" || args[1] == "summary" {
-            log::debug!("Init show summary");
+            log::info!("Init show summary");
             file::show_file(file::CSV_FILE_PATH_NAME);
             process::exit(process_status_code::OK_EXIT_CODE);
         } else {
-            log::debug!("Init monitor");
+            log::info!("Init monitor");
             let config = MonitorConfig::new(&args).unwrap_or_else(|e| {
                 log::error!("Problem parsing arguments: {}", e);
                 help();

@@ -10,13 +10,13 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
     devices.show_system_current_status()?;
     match &config.start_or_end[..] {
         "on" => {
-            log::debug!("Init on USB");
+            log::info!("Init on USB");
             mount(&devices)?;
             devices.show_system_current_status()?;
-            log::debug!("Completed on USB");
+            log::info!("Completed on USB");
         }
         "off" => {
-            log::debug!("Init off USB");
+            log::info!("Init off USB");
             if is_partition(&devices.partition) {
                 unmount(&devices)?;
                 devices.show_system_current_status()?;
@@ -34,7 +34,7 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
                 return Err("invalid device".to_string());
             }
             devices.show_system_current_status()?;
-            log::debug!("Completed off USB");
+            log::info!("Completed off USB");
         }
         _ => {
             return Err("invalid command".to_string());
@@ -95,7 +95,7 @@ fn get_mount_status(device: &String) -> command_line::command::CommandResult {
 fn unmount(devices: &Devices) -> command_line::command::CommandResult {
     let device_path = &devices.partition;
     log::debug!("Init unmount {}", device_path);
-    if Path::new(device_path).exists() {
+    if !get_mount_status(device_path).unwrap().is_empty() && Path::new(device_path).exists() {
         command_line::command::run(&format!("udisksctl unmount -b {}", device_path))?;
     } else {
         log::debug!("No mounted device to manage");
