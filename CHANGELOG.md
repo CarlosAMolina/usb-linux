@@ -6,7 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added
-- Add show mounted devices.
+- Show devices.
+- Show mounted devices by the project.
 - Export mount info to file.
 - Help option.
 - Logs.
