@@ -13,7 +13,6 @@ pub fn save_mount_info_to_file(file_path: &str, device_partition: &String, mount
     append_to_file(file_path, record).unwrap();
 }
 
-// TODO save headers in save_mount_info_to_file
 pub fn delete_mount_info_in_file(file_path: &str, device_partition: &String) {
     log::debug!("Init delete mount info of {}", device_partition);
     if Path::new(file_path).exists() {
