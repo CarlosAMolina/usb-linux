@@ -7,6 +7,7 @@ use usb::file;
 use usb::monitor::Config as MonitorConfig;
 use usb::on_off::Config as OnOffConfig;
 use usb::process_status_code;
+use usb::system;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -17,8 +18,12 @@ fn main() {
         if args[1] == "-h" || args[1] == "help" {
             help();
             process::exit(process_status_code::OK_EXIT_CODE);
+        } else if args[1] == "-d" || args[1] == "devices" {
+            log::debug!("Init show devices");
+            system::show_devices();
+            process::exit(process_status_code::OK_EXIT_CODE);
         } else if args[1] == "-s" || args[1] == "summary" {
-            log::debug!("Init summary");
+            log::debug!("Init show summary");
             file::show_file(file::CSV_FILE_PATH_NAME);
             process::exit(process_status_code::OK_EXIT_CODE);
         } else {
@@ -59,9 +64,14 @@ fn help() {
             Shows help.
         Example:
             cargo run -- -h
+    Option devices
+        cargo run -- {{-d|devices}}
+            Show /dev/sd* devices. Useful to know new ones.
+        Example:
+            cargo run -- -s
     Option summary
         cargo run -- {{-s|summary}}
-            Shows the devices currently mounted by this project.
+            Show the devices currently mounted by this project.
         Example:
             cargo run -- -s
     Option monitor
