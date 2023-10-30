@@ -76,6 +76,16 @@ impl MountInfo {
     }
 }
 
+pub fn show_file(file_path: &str) {
+    if Path::new(file_path).exists() {
+        let contents = std::fs::read_to_string(file_path).unwrap();
+        println!("{}", contents);
+    } else {
+        log::debug!("The file does not exists: {}", file_path);
+        log::info!("No devices have been mounted");
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

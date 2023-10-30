@@ -3,6 +3,7 @@ use log4rs;
 use std::env;
 use std::process;
 
+use usb::file;
 use usb::monitor::Config as MonitorConfig;
 use usb::on_off::Config as OnOffConfig;
 use usb::process_status_code;
@@ -15,6 +16,10 @@ fn main() {
     if args.len() == 2 {
         if args[1] == "-h" || args[1] == "help" {
             help();
+            process::exit(process_status_code::OK_EXIT_CODE);
+        } else if args[1] == "-s" || args[1] == "summary" {
+            log::debug!("Init summary");
+            file::show_file(file::CSV_FILE_PATH_NAME);
             process::exit(process_status_code::OK_EXIT_CODE);
         } else {
             log::debug!("Init monitor");
@@ -51,9 +56,14 @@ fn help() {
         "Usage
     Option help
         cargo run -- {{-h|help}}
-            Shows help
+            Shows help.
         Example:
             cargo run -- -h
+    Option summary
+        cargo run -- {{-s|summary}}
+            Shows the devices currently mounted by this project.
+        Example:
+            cargo run -- -s
     Option monitor
         cargo run <string>
             Notify a device's path and mount it if required.
