@@ -68,7 +68,7 @@ fn help() {
         cargo run -- {{-d|devices}}
             Show /dev/sd* devices. Useful to know new ones.
         Example:
-            cargo run -- -s
+            cargo run -- -d
     Option summary
         cargo run -- {{-s|summary}}
             Show the devices currently mounted by this project.
