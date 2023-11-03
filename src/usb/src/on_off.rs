@@ -167,7 +167,11 @@ impl Devices {
 
     fn get_system_current_status(&self) -> command_line::command::CommandResult {
         let devices_status =
-            command_line::command::run(&format!("ls {}*", &self.raw))?;
+            command_line::command::run(&format!("ls /dev/* | grep {}", &self.raw))?;
+            // TODO command_line::command::run(&format!("ls {}*", &self.raw))?;
+            // TODO fix: if self.raw is only accessed by sudo, the command fails
+            // TODO not fix until adding a test that checks that a sudo folder does not raises
+            // exception
         let mount_status = get_mount_status(&self.raw)?;
         let result = format!(
             "System current status:
