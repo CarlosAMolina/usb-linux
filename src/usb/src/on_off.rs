@@ -167,7 +167,7 @@ impl Devices {
 
     fn get_system_current_status(&self) -> command_line::command::CommandResult {
         let devices_status =
-            command_line::command::run(&format!("ls /dev/* | grep {}", &self.raw))?;
+            command_line::command::run(&format!("ls {}*", &self.raw))?;
         let mount_status = get_mount_status(&self.raw)?;
         let result = format!(
             "System current status:
