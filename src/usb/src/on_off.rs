@@ -165,6 +165,7 @@ impl Devices {
         Ok("Ok".to_string())
     }
 
+    // TODO move to system.rs
     fn get_system_current_status(&self) -> command_line::command::CommandResult {
         let devices_status =
             command_line::command::run(&format!("ls /dev/* | grep {}", &self.raw))?;
@@ -187,6 +188,12 @@ impl Devices {
     }
 }
 
+// TODO use
+fn get_system_current_status(devices_path_name: &String, device_raw_path_name: &String) -> command_line::command::CommandResult {
+    // TODO devices_path_name must end with `/`, assert it.
+    command_line::command::run(&format!("ls {}* | grep {}", devices_path_name, device_raw_path_name))
+}
+
 fn get_partition_mount_status_to_show(partition_mount_status: &String) -> String {
     let string_parts: Vec<&str> = partition_mount_status.split_whitespace().collect();
     let result = format!("{} mounted on {}", string_parts[0], string_parts[2]);
@@ -203,6 +210,25 @@ mod tests {
         assert_eq!(
             "/dev/sda4 mounted on /",
             get_partition_mount_status_to_show(&partition_mount_status)
+        );
+    }
+
+    // TODO check if a directory has permissions that imply the user cannot list
+    #[test]
+    fn get_system_current_status_runs_ok() {
+        /*
+         * To run this test:
+         * - Create path: /tmp/usb-tests/dev
+         * - In that path create a folder owned by root:root with chmod 700
+         */
+        let devices_path_name = "/tmp/usb-tests/dev/".to_string();
+        let device_raw_path_name = "/tmp/usb-tests/dev/sda".to_string();
+        assert_eq!(
+            "TODO",
+            get_system_current_status(
+                &devices_path_name,
+                &device_raw_path_name
+            ).unwrap()
         );
     }
 }
