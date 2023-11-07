@@ -24,20 +24,15 @@ fn get_system_current_status(
     device_raw_path_name: &String,
 ) -> command_line::command::CommandResult {
     let devices_status = get_devices_system_current_status(device_raw_path_name)?;
-    if devices_status.is_empty() {
-        let result = "No devices found related to the provided".to_string();
-        Ok(result)
-    } else {
-        let mount_status = get_mount_status(device_raw_path_name)?;
-        let result = format!(
-            "System current status:
+    let mount_status = get_mount_status(device_raw_path_name)?;
+    let result = format!(
+        "System current status:
 - Connected devices:
 {devices_status}
 - Mounted devices:
 {mount_status}"
-        );
-        Ok(result.to_string())
-    }
+    );
+    Ok(result.to_string())
 }
 
 fn get_devices_system_current_status(
@@ -76,7 +71,7 @@ mod tests {
     fn get_system_current_status_if_raw_path_does_not_exist() {
         let device_raw_path_name = "/asdf/foo/asdf/bar".to_string();
         assert_eq!(
-            "No devices found related to the provided",
+            "System current status:\n- Connected devices:\n\n- Mounted devices:\n",
             get_system_current_status(&device_raw_path_name).unwrap()
         );
     }
