@@ -24,52 +24,62 @@ fn get_system_current_status(
     device_raw_path_name: &String,
 ) -> command_line::command::CommandResult {
     let devices_status = get_devices_system_current_status(device_raw_path_name)?;
-    let mount_status = get_mount_status(device_raw_path_name)?;
-    let result = format!(
-        "System current status:
+    if devices_status.is_empty() {
+        let result = "No devices found related to the provided".to_string();
+        Ok(result)
+    } else {
+        let mount_status = get_mount_status(device_raw_path_name)?;
+        let result = format!(
+            "System current status:
 - Connected devices:
 {devices_status}
 - Mounted devices:
 {mount_status}"
-    );
-    Ok(result.to_string())
+        );
+        Ok(result.to_string())
+    }
 }
 
 fn get_devices_system_current_status(
     device_raw_path_name: &String,
 ) -> command_line::command::CommandResult {
     let device_raw_path = Path::new(device_raw_path_name);
-    let devices_path_name = device_raw_path.parent().unwrap().to_str().unwrap();
-    let raw_device_name = device_raw_path.file_name().unwrap().to_str().unwrap();
-    let device_names_str = command_line::command::run(&format!(
-        "ls {} | grep {}",
-        devices_path_name, raw_device_name
-    ))?;
-    let device_names_all: Vec<&str> = device_names_str.split("\n").collect();
-    let device_names: Vec<_> = device_names_all
-        .iter()
-        .filter(|name| !name.is_empty())
-        .collect();
-    let device_path_names: Vec<_> = device_names
-        .iter()
-        .map(|name| format!("{}/{}", devices_path_name, name))
-        .collect();
-    let result = device_path_names.join("\n");
-    Ok(result)
+    if device_raw_path.exists() {
+        let devices_path_name = device_raw_path.parent().unwrap().to_str().unwrap();
+        let raw_device_name = device_raw_path.file_name().unwrap().to_str().unwrap();
+        let device_names_str = command_line::command::run(&format!(
+            "ls {} | grep {}",
+            devices_path_name, raw_device_name
+        ))?;
+        let device_names_all: Vec<&str> = device_names_str.split("\n").collect();
+        let device_names: Vec<_> = device_names_all
+            .iter()
+            .filter(|name| !name.is_empty())
+            .collect();
+        let device_path_names: Vec<_> = device_names
+            .iter()
+            .map(|name| format!("{}/{}", devices_path_name, name))
+            .collect();
+        let result = device_path_names.join("\n");
+        Ok(result)
+    } else {
+        let result = "".to_string();
+        Ok(result)
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    // TODO #[test]
-    // TODO fn get_system_current_status_if_raw_path_does_not_exist() {
-    // TODO     let device_raw_path_name = "/asdf/foo/asdf/bar".to_string();
-    // TODO     assert_eq!(
-    // TODO         "",
-    // TODO         get_system_current_status(&device_raw_path_name).unwrap()
-    // TODO     );
-    // TODO }
+    #[test]
+    fn get_system_current_status_if_raw_path_does_not_exist() {
+        let device_raw_path_name = "/asdf/foo/asdf/bar".to_string();
+        assert_eq!(
+            "No devices found related to the provided",
+            get_system_current_status(&device_raw_path_name).unwrap()
+        );
+    }
 
     #[test]
     fn get_devices_system_current_status_if_raw_path_does_not_exist() {
