@@ -9,6 +9,7 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
         log::debug!("Notify path: yes");
         let mounted_path = command_line::mount_device(&path)?;
         notify(&path, &mounted_path)?;
+        // TODO save in file mounted info
     } else {
         log::debug!("Notify path: no");
     }
