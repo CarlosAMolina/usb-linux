@@ -167,8 +167,7 @@ impl Devices {
 
     // TODO move to system.rs
     fn get_system_current_status(&self) -> command_line::command::CommandResult {
-        let devices_status =
-            command_line::command::run(&format!("ls /dev/* | grep {}", &self.raw))?;
+        let devices_status = get_devices_system_current_status(&self.raw)?;
         let mount_status = get_mount_status(&self.raw)?;
         let result = format!(
             "System current status:
@@ -181,9 +180,7 @@ impl Devices {
     }
 }
 
-// TODO use
-// TODO rename to get_devices_in_system
-fn get_system_current_status(
+fn get_devices_system_current_status(
     device_raw_path_name_str: &String,
 ) -> command_line::command::CommandResult {
     let device_raw_path_name = Path::new(device_raw_path_name_str);
@@ -228,7 +225,7 @@ mod tests {
     // TODO new test: non existent raw path
 
     #[test]
-    fn get_system_current_status_runs_ok_if_no_permissions_on_a_folder() {
+    fn get_devices_system_current_status_runs_ok_if_no_permissions_on_a_folder() {
         /*
          * To run this test:
          * ```bash
@@ -243,7 +240,7 @@ mod tests {
         let device_raw_path_name = "/tmp/usb-tests/dev/sda".to_string();
         assert_eq!(
             "/tmp/usb-tests/dev/sda\n/tmp/usb-tests/dev/sda1\n/tmp/usb-tests/dev/sda2",
-            get_system_current_status(&device_raw_path_name).unwrap()
+            get_devices_system_current_status(&device_raw_path_name).unwrap()
         );
     }
 }
