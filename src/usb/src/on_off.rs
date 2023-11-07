@@ -169,13 +169,13 @@ impl Devices {
     fn get_system_current_status(&self) -> command_line::command::CommandResult {
         let devices_status =
             command_line::command::run(&format!("ls /dev/* | grep {}", &self.raw))?;
-            // TODO command_line::command::run(&format!("ls {}*", &self.raw))?;
-            // TODO fix: if self.raw is only accessed by sudo, the command fails
-            // TODO not fix until adding a test that checks that a sudo folder does not raises
-            // exception
-            // Example error (when running:  cargo run /dev/sda1 off): 
-            // 2023-11-03T20:43:10.189779190+01:00 DEBUG usb::command_line::command - Init: ls /dev/* | grep /dev/sda
-            // 2023-11-03T20:43:10.195242460+01:00 ERROR usb - Application error: ls: no se puede abrir el directorio '/dev/vboxusb': Permiso denegado
+        // TODO command_line::command::run(&format!("ls {}*", &self.raw))?;
+        // TODO fix: if self.raw is only accessed by sudo, the command fails
+        // TODO not fix until adding a test that checks that a sudo folder does not raises
+        // exception
+        // Example error (when running:  cargo run /dev/sda1 off):
+        // 2023-11-03T20:43:10.189779190+01:00 DEBUG usb::command_line::command - Init: ls /dev/* | grep /dev/sda
+        // 2023-11-03T20:43:10.195242460+01:00 ERROR usb - Application error: ls: no se puede abrir el directorio '/dev/vboxusb': Permiso denegado
         let mount_status = get_mount_status(&self.raw)?;
         let result = format!(
             "System current status:
@@ -189,9 +189,28 @@ impl Devices {
 }
 
 // TODO use
-fn get_system_current_status(devices_path_name: &String, device_raw_path_name: &String) -> command_line::command::CommandResult {
-    // TODO devices_path_name must end with `/`, assert it.
-    command_line::command::run(&format!("ls {}* | grep {}", devices_path_name, device_raw_path_name))
+// TODO rename to get_devices_in_system
+fn get_system_current_status(
+    device_raw_path_name_str: &String,
+) -> command_line::command::CommandResult {
+    let device_raw_path_name = Path::new(device_raw_path_name_str);
+    let devices_path_name = device_raw_path_name.parent().unwrap().to_str().unwrap();
+    let raw_device_name = device_raw_path_name.file_name().unwrap().to_str().unwrap();
+    let device_names_str = command_line::command::run(&format!(
+        "ls {} | grep {}",
+        devices_path_name, raw_device_name
+    ))?;
+    let device_names_all: Vec<&str> = device_names_str.split("\n").collect();
+    let device_names: Vec<_> = device_names_all
+        .iter()
+        .filter(|name| !name.is_empty())
+        .collect();
+    let device_path_names: Vec<_> = device_names
+        .iter()
+        .map(|name| format!("{}/{}", devices_path_name, name))
+        .collect();
+    let result = device_path_names.join("\n");
+    Ok(result)
 }
 
 fn get_partition_mount_status_to_show(partition_mount_status: &String) -> String {
@@ -213,22 +232,25 @@ mod tests {
         );
     }
 
-    // TODO check if a directory has permissions that imply the user cannot list
+    // TODO new test: non existent raw path
+
     #[test]
-    fn get_system_current_status_runs_ok() {
+    fn get_system_current_status_runs_ok_if_no_permissions_on_a_folder() {
         /*
          * To run this test:
-         * - Create path: /tmp/usb-tests/dev
-         * - In that path create a folder owned by root:root with chmod 700
+         * ```bash
+         * mkdir -p /tmp/usb-tests/dev/sda
+         * mkdir /tmp/usb-tests/dev/sda1
+         * mkdir /tmp/usb-tests/dev/sda2
+         * mkdir /tmp/usb-tests/dev/folder_no_permissions
+         * chmod 700 /tmp/usb-tests/dev/folder_no_permissions
+         * sudo chown root:root /tmp/usb-tests/dev/folder_no_permissions
+         * ```
          */
-        let devices_path_name = "/tmp/usb-tests/dev/".to_string();
         let device_raw_path_name = "/tmp/usb-tests/dev/sda".to_string();
         assert_eq!(
-            "TODO",
-            get_system_current_status(
-                &devices_path_name,
-                &device_raw_path_name
-            ).unwrap()
+            "/tmp/usb-tests/dev/sda\n/tmp/usb-tests/dev/sda1\n/tmp/usb-tests/dev/sda2",
+            get_system_current_status(&device_raw_path_name).unwrap()
         );
     }
 }
