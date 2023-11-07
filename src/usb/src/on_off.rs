@@ -1,25 +1,24 @@
-use std::path::Path;
-
 use crate::command_line;
 use crate::file;
+use std::path::Path;
 
 pub fn run(config: Config) -> command_line::command::CommandResult {
     let devices = Devices::new(&config);
     log::debug!("User input device: {}", config.partition_device);
     devices.show_device_summary();
-    devices.show_system_current_status()?;
+    system::show_system_current_status(&devices.raw)?;
     match &config.start_or_end[..] {
         "on" => {
             log::info!("Init on USB");
             mount(&devices)?;
-            devices.show_system_current_status()?;
+            system::show_system_current_status(&devices.raw)?;
             log::info!("Completed on USB");
         }
         "off" => {
             log::info!("Init off USB");
             if is_partition(&devices.partition) {
                 unmount(&devices)?;
-                devices.show_system_current_status()?;
+                system::show_system_current_status(&devices.raw)?;
                 file::delete_mount_info_in_file(file::CSV_FILE_PATH_NAME, &devices.partition);
             } else {
                 log::debug!(
@@ -33,7 +32,7 @@ pub fn run(config: Config) -> command_line::command::CommandResult {
                 log::debug!("Invalid raw device: {}. Omitting power off", devices.raw);
                 return Err("invalid device".to_string());
             }
-            devices.show_system_current_status()?;
+            system::show_system_current_status(&devices.raw)?;
             log::info!("Completed off USB");
         }
         _ => {
@@ -52,7 +51,7 @@ fn mount(devices: &Devices) -> command_line::command::CommandResult {
         return Err("invalid partition device".to_string());
     }
     log::debug!("Init mount {}", devices.partition);
-    let mount_status = get_mount_status(&devices.raw)?;
+    let mount_status = system::get_mount_status(&devices.raw)?;
     if mount_status.is_empty() {
         let device_partition = &devices.partition;
         if Path::new(device_partition).exists() {
@@ -63,7 +62,7 @@ fn mount(devices: &Devices) -> command_line::command::CommandResult {
         }
     } else {
         log::info!("{}", "Device already mounted");
-        let partition_mount_status = get_mount_status(&devices.partition)?;
+        let partition_mount_status = system::get_mount_status(&devices.partition)?;
         let partition_mount_status_to_show =
             get_partition_mount_status_to_show(&partition_mount_status);
         log::info!("{}", partition_mount_status_to_show);
@@ -88,14 +87,11 @@ fn is_device_raw(string: &String) -> bool {
     }
 }
 
-fn get_mount_status(device: &String) -> command_line::command::CommandResult {
-    command_line::command::run(&format!("mount | grep {}", device))
-}
-
 fn unmount(devices: &Devices) -> command_line::command::CommandResult {
     let device_path = &devices.partition;
     log::debug!("Init unmount {}", device_path);
-    if !get_mount_status(device_path).unwrap().is_empty() && Path::new(device_path).exists() {
+    if !system::get_mount_status(device_path).unwrap().is_empty() && Path::new(device_path).exists()
+    {
         command_line::command::run(&format!("udisksctl unmount -b {}", device_path))?;
     } else {
         log::debug!("No mounted device to manage");
@@ -157,18 +153,27 @@ impl Devices {
         );
         log::debug!("{}", summary);
     }
+}
+// TODO move to system.rs
+mod system {
 
-    fn show_system_current_status(&self) -> command_line::command::CommandResult {
+    use crate::command_line;
+    use std::path::Path;
+
+    pub fn show_system_current_status(
+        device_raw_path_name_str: &String,
+    ) -> command_line::command::CommandResult {
         log::debug!("Init show system current status");
-        let system_status = self.get_system_current_status()?;
+        let system_status = get_system_current_status(device_raw_path_name_str)?;
         log::debug!("{}", system_status);
         Ok("Ok".to_string())
     }
 
-    // TODO move to system.rs
-    fn get_system_current_status(&self) -> command_line::command::CommandResult {
-        let devices_status = get_devices_system_current_status(&self.raw)?;
-        let mount_status = get_mount_status(&self.raw)?;
+    fn get_system_current_status(
+        device_raw_path_name_str: &String,
+    ) -> command_line::command::CommandResult {
+        let devices_status = get_devices_system_current_status(device_raw_path_name_str)?;
+        let mount_status = get_mount_status(device_raw_path_name_str)?;
         let result = format!(
             "System current status:
 - Connected devices:
@@ -178,29 +183,60 @@ impl Devices {
         );
         Ok(result.to_string())
     }
-}
 
-fn get_devices_system_current_status(
-    device_raw_path_name_str: &String,
-) -> command_line::command::CommandResult {
-    let device_raw_path_name = Path::new(device_raw_path_name_str);
-    let devices_path_name = device_raw_path_name.parent().unwrap().to_str().unwrap();
-    let raw_device_name = device_raw_path_name.file_name().unwrap().to_str().unwrap();
-    let device_names_str = command_line::command::run(&format!(
-        "ls {} | grep {}",
-        devices_path_name, raw_device_name
-    ))?;
-    let device_names_all: Vec<&str> = device_names_str.split("\n").collect();
-    let device_names: Vec<_> = device_names_all
-        .iter()
-        .filter(|name| !name.is_empty())
-        .collect();
-    let device_path_names: Vec<_> = device_names
-        .iter()
-        .map(|name| format!("{}/{}", devices_path_name, name))
-        .collect();
-    let result = device_path_names.join("\n");
-    Ok(result)
+    fn get_devices_system_current_status(
+        device_raw_path_name_str: &String,
+    ) -> command_line::command::CommandResult {
+        let device_raw_path_name = Path::new(device_raw_path_name_str);
+        let devices_path_name = device_raw_path_name.parent().unwrap().to_str().unwrap();
+        let raw_device_name = device_raw_path_name.file_name().unwrap().to_str().unwrap();
+        let device_names_str = command_line::command::run(&format!(
+            "ls {} | grep {}",
+            devices_path_name, raw_device_name
+        ))?;
+        let device_names_all: Vec<&str> = device_names_str.split("\n").collect();
+        let device_names: Vec<_> = device_names_all
+            .iter()
+            .filter(|name| !name.is_empty())
+            .collect();
+        let device_path_names: Vec<_> = device_names
+            .iter()
+            .map(|name| format!("{}/{}", devices_path_name, name))
+            .collect();
+        let result = device_path_names.join("\n");
+        Ok(result)
+    }
+
+    pub fn get_mount_status(device: &String) -> command_line::command::CommandResult {
+        command_line::command::run(&format!("mount | grep {}", device))
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        // TODO new test: non existent raw path
+
+        #[test]
+        fn get_devices_system_current_status_runs_ok_if_no_permissions_on_a_folder() {
+            /*
+             * To run this test:
+             * ```bash
+             * mkdir -p /tmp/usb-tests/dev/sda
+             * mkdir /tmp/usb-tests/dev/sda1
+             * mkdir /tmp/usb-tests/dev/sda2
+             * mkdir /tmp/usb-tests/dev/folder_no_permissions
+             * chmod 700 /tmp/usb-tests/dev/folder_no_permissions
+             * sudo chown root:root /tmp/usb-tests/dev/folder_no_permissions
+             * ```
+             */
+            let device_raw_path_name = "/tmp/usb-tests/dev/sda".to_string();
+            assert_eq!(
+                "/tmp/usb-tests/dev/sda\n/tmp/usb-tests/dev/sda1\n/tmp/usb-tests/dev/sda2",
+                get_devices_system_current_status(&device_raw_path_name).unwrap()
+            );
+        }
+    }
 }
 
 fn get_partition_mount_status_to_show(partition_mount_status: &String) -> String {
@@ -219,28 +255,6 @@ mod tests {
         assert_eq!(
             "/dev/sda4 mounted on /",
             get_partition_mount_status_to_show(&partition_mount_status)
-        );
-    }
-
-    // TODO new test: non existent raw path
-
-    #[test]
-    fn get_devices_system_current_status_runs_ok_if_no_permissions_on_a_folder() {
-        /*
-         * To run this test:
-         * ```bash
-         * mkdir -p /tmp/usb-tests/dev/sda
-         * mkdir /tmp/usb-tests/dev/sda1
-         * mkdir /tmp/usb-tests/dev/sda2
-         * mkdir /tmp/usb-tests/dev/folder_no_permissions
-         * chmod 700 /tmp/usb-tests/dev/folder_no_permissions
-         * sudo chown root:root /tmp/usb-tests/dev/folder_no_permissions
-         * ```
-         */
-        let device_raw_path_name = "/tmp/usb-tests/dev/sda".to_string();
-        assert_eq!(
-            "/tmp/usb-tests/dev/sda\n/tmp/usb-tests/dev/sda1\n/tmp/usb-tests/dev/sda2",
-            get_devices_system_current_status(&device_raw_path_name).unwrap()
         );
     }
 }
