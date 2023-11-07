@@ -169,13 +169,6 @@ impl Devices {
     fn get_system_current_status(&self) -> command_line::command::CommandResult {
         let devices_status =
             command_line::command::run(&format!("ls /dev/* | grep {}", &self.raw))?;
-        // TODO command_line::command::run(&format!("ls {}*", &self.raw))?;
-        // TODO fix: if self.raw is only accessed by sudo, the command fails
-        // TODO not fix until adding a test that checks that a sudo folder does not raises
-        // exception
-        // Example error (when running:  cargo run /dev/sda1 off):
-        // 2023-11-03T20:43:10.189779190+01:00 DEBUG usb::command_line::command - Init: ls /dev/* | grep /dev/sda
-        // 2023-11-03T20:43:10.195242460+01:00 ERROR usb - Application error: ls: no se puede abrir el directorio '/dev/vboxusb': Permiso denegado
         let mount_status = get_mount_status(&self.raw)?;
         let result = format!(
             "System current status:
